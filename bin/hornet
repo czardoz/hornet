@@ -20,8 +20,10 @@
 import logging
 import argparse
 
+from hornet.main import Hornet
+
 __version_tuple__ = (0, 0, 1)
-__version__ = ''.join(map(str, __version_tuple__))
+__version__ = '.'.join(map(str, __version_tuple__))
 
 
 def setup_logging(verbose=False):
@@ -47,3 +49,5 @@ if __name__ == '__main__':
     setup_logging(args.verbose)
 
     logging.debug('Starting Hornet, version: {}'.format(__version__))
+    honeypot = Hornet()
+    honeypot.start()
