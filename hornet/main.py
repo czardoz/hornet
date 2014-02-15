@@ -21,18 +21,25 @@ import json
 import logging
 import os
 import shutil
+import gevent.server
 
 import hornet
+from hornet.core.handler import SSHHandler
 
 
 class Hornet(object):
 
+    handler_class = SSHHandler
+
     def __init__(self):
+        self.host = None
         self.port = None
         self.server = None
-        self.load_config()
+        self.handler = None
+        self.server_greenlet = None
+        self._load_config()
 
-    def load_config(self):
+    def _load_config(self):
         if not os.path.isfile('config.json'):
             source = os.path.join(os.path.dirname(hornet.__file__), 'data', 'default_config.json')
             destination = os.path.join(os.getcwd(), 'config.json')
@@ -40,7 +47,12 @@ class Hornet(object):
             shutil.copyfile(src=source, dst=destination)
         with open('config.json', 'r') as config_fp:
             config = json.load(config_fp)
-        self.port = config['port']
+        self.port = config.get('port', None) or 22
+        self.host = config.get('host', None) or '0.0.0.0'
 
     def start(self):
-        pass
+        self.handler = self.handler_class()
+        self.server = gevent.server.StreamServer((self.host, self.port), handle=self.handler.handle_session)
+        self.server_greenlet = gevent.spawn(self.server.serve_forever)
+        return self.server_greenlet
+

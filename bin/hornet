@@ -19,6 +19,7 @@
 
 import logging
 import argparse
+import gevent
 
 from hornet.main import Hornet
 
@@ -48,6 +49,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     setup_logging(args.verbose)
 
-    logging.debug('Starting Hornet, version: {}'.format(__version__))
+    logging.info('Starting Hornet, version: {}'.format(__version__))
     honeypot = Hornet()
-    honeypot.start()
+    greenlet = honeypot.start()
+
+    try:
+        gevent.joinall([greenlet])
+    except KeyboardInterrupt:
+        logging.info('Quitting')
