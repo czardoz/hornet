@@ -46,11 +46,12 @@ if __name__ == '__main__':
     # Command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help='More detailed logging.')
+    parser.add_argument('-c', '--config-file', default='config.json', help='Path to the config file.')
     args = parser.parse_args()
     setup_logging(args.verbose)
 
     logging.info('Starting Hornet, version: {}'.format(__version__))
-    honeypot = Hornet()
+    honeypot = Hornet(args.config_file)
     greenlet = honeypot.start()
 
     try:
