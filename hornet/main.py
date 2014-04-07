@@ -25,34 +25,46 @@ import gevent.server
 
 import hornet
 from hornet.core.handler import SSHHandler
+from hornet.common.config import Config
+from hornet.core.host import VirtualHost
 
 
 class Hornet(object):
 
-    handler_class = SSHHandler
-
-    def __init__(self):
-        self.host = None
-        self.port = None
+    def __init__(self, config_file):
         self.server = None
         self.handler = None
         self.server_greenlet = None
-        self._load_config()
+        self.sessions = {}
+        self.config_path = config_file
+        self.config = self._load_config()
+        # Create a virtual hosts directory, if it doesn't exist
+        if not os.path.isdir('vhosts'):
+            logging.info('Creating a directory for virtual host data.')
+            os.mkdir('vhosts')
+        self.vhosts = self._create_vhosts()
 
     def _load_config(self):
-        if not os.path.isfile('config.json'):
+        if not os.path.isfile(self.config_path):
             source = os.path.join(os.path.dirname(hornet.__file__), 'data', 'default_config.json')
-            destination = os.path.join(os.getcwd(), 'config.json')
-            logging.debug('Config file not found, copying default'.format(source))
+            destination = self.config_path
+            logging.info('Config file {} not found, copying default'.format(destination))
             shutil.copyfile(src=source, dst=destination)
-        with open('config.json', 'r') as config_fp:
-            config = json.load(config_fp)
-        self.port = config.get('port', None) or 22
-        self.host = config.get('host', None) or '0.0.0.0'
+        with open(self.config_path, 'r') as config_fp:
+            config_params = json.load(config_fp)
+            return Config(config_params)
+
+    def _create_vhosts(self):
+        hosts = {}
+        for host_params in self.config.vhost_params:
+            h = VirtualHost(host_params, self.config.network)
+            hosts[h.ip_address] = h
+        return hosts
 
     def start(self):
-        self.handler = self.handler_class()
-        self.server = gevent.server.StreamServer((self.host, self.port), handle=self.handler.handle_session)
+        self.handler = SSHHandler(self.vhosts, self.sessions)
+        self.server = gevent.server.StreamServer((self.config.host, self.config.port),
+                                                 handle=self.handler.handle_session)
         self.server_greenlet = gevent.spawn(self.server.serve_forever)
         return self.server_greenlet
 

@@ -1,3 +1,26 @@
 {
-    "port": 2222
+    "port": 2222,
+    "host": "0.0.0.0",
+    "network": {
+        "network_ip": "192.168.0.0/24",
+        "dns_server": "192.168.0.2",
+        "gateway": "192.168.0.1"
+    },
+    "virtual_hosts": [
+        {
+            "hostname": "hell01",
+            "valid_logins": {
+                "admin": "admin123",
+                "root": "toor"
+            }
+        },
+        {
+            "hostname": "heaven09",
+            "valid_logins": {
+                "administrator": "qwerty",
+                "httpd": "httpd",
+                "root": "s3cr3t"
+            }
+        }
+    ]
 }
