@@ -2,3 +2,4 @@ gevent
 paramiko
 netaddr
 fs
+nose
