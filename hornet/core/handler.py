@@ -17,11 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+
 
 class SSHHandler(object):
 
-    def __init__(self):
-        pass
+    def __init__(self, vhosts, sessions):
+        self.vhosts = vhosts
+        self.sessions = sessions
 
     def handle_session(self, client_socket, client_address):
-        pass
+        logging.info('Connection from {}'.format(client_address))
