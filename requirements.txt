@@ -1,2 +1,4 @@
 gevent
 paramiko
+netaddr
+fs
