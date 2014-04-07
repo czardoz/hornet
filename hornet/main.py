@@ -28,6 +28,8 @@ from hornet.core.handler import SSHHandler
 from hornet.common.config import Config
 from hornet.core.host import VirtualHost
 
+logger = logging.getLogger(__name__)
+
 
 class Hornet(object):
 
@@ -47,7 +49,7 @@ class Hornet(object):
         if not os.path.isfile(config_path):
             source = os.path.join(os.path.dirname(hornet.__file__), 'data', 'default_config.json')
             destination = config_path
-            logging.info('Config file {} not found, copying default'.format(destination))
+            logger.info('Config file {} not found, copying default'.format(destination))
             shutil.copyfile(src=source, dst=destination)
         with open(config_path, 'r') as config_fp:
             config_params = json.load(config_fp)
@@ -58,7 +60,7 @@ class Hornet(object):
         # Create a directory for virtual filesystems, if it doesn't exist
         vhosts_path = os.path.join(self.working_directory, 'vhosts')
         if not os.path.isdir(vhosts_path):
-            logging.info('Creating directory {} for virtual host filesystems.'.format(vhosts_path))
+            logger.info('Creating directory {} for virtual host filesystems.'.format(vhosts_path))
             os.mkdir(vhosts_path)
 
         hosts = {}

@@ -19,6 +19,8 @@
 
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 class SSHHandler(object):
 
@@ -27,4 +29,4 @@ class SSHHandler(object):
         self.sessions = sessions
 
     def handle_session(self, client_socket, client_address):
-        logging.info('Connection from {}'.format(client_address))
+        logger.info('Connection from {}'.format(client_address))
