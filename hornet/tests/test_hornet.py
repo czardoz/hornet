@@ -38,8 +38,19 @@ class HornetTests(unittest.TestCase):
 
     def test_config_loading(self):
         """ Tests whether Hornet can properly load a configuration file"""
+
         honeypot = Hornet(self.working_dir)
         self.assertEquals(honeypot.config.host, '127.0.0.1')
         self.assertEquals(honeypot.config.port, 2222)
         self.assertEquals(len(honeypot.config.vhost_params), 2)
+
+    def test_vfs_creation(self):
+        """ Tests whether virtual file systems for each host are created. """
+
+        honeypot = Hornet(self.working_dir)
+        vfs_dir = os.path.join(self.working_dir, 'vhosts')
+        self.assertTrue(os.path.isdir(vfs_dir))
+        for item in os.listdir(vfs_dir):
+            self.assertTrue(item.startswith('test'))
+
 
