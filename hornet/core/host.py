@@ -20,16 +20,13 @@
 import logging
 import random
 import os
+from fs.osfs import OSFS
 
 
 class VirtualHost(object):
 
-    def __init__(self, params, network):
+    def __init__(self, params, network, fs_dir):
         self.ip_address = str(random.choice(list(network[1:-1])))
         self.hostname = params['hostname']
         self.valid_logins = params['valid_logins']
-        self.file_system_dir = os.path.join('vhosts', '{}_{}'.format(self.hostname, self.ip_address))
-        # Create a filesystem for this host, if it already doesn't exist
-        if not os.path.isdir(self.file_system_dir):
-            logging.info('Filesystem for {} does not exist, creating {}'.format(self.hostname, self.file_system_dir))
-            os.mkdir(self.file_system_dir)
+        self.filesystem = OSFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)

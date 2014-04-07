@@ -31,33 +31,39 @@ from hornet.core.host import VirtualHost
 
 class Hornet(object):
 
-    def __init__(self, config_file):
+    def __init__(self, working_directory):
         self.server = None
         self.handler = None
         self.server_greenlet = None
         self.sessions = {}
-        self.config_path = config_file
+        self.working_directory = working_directory
         self.config = self._load_config()
-        # Create a virtual hosts directory, if it doesn't exist
-        if not os.path.isdir('vhosts'):
-            logging.info('Creating a directory for virtual host data.')
-            os.mkdir('vhosts')
+
+        # Create virtual hosts
         self.vhosts = self._create_vhosts()
 
     def _load_config(self):
-        if not os.path.isfile(self.config_path):
+        config_path = os.path.join(self.working_directory, 'config.json')
+        if not os.path.isfile(config_path):
             source = os.path.join(os.path.dirname(hornet.__file__), 'data', 'default_config.json')
-            destination = self.config_path
+            destination = config_path
             logging.info('Config file {} not found, copying default'.format(destination))
             shutil.copyfile(src=source, dst=destination)
-        with open(self.config_path, 'r') as config_fp:
+        with open(config_path, 'r') as config_fp:
             config_params = json.load(config_fp)
             return Config(config_params)
 
     def _create_vhosts(self):
+
+        # Create a directory for virtual filesystems, if it doesn't exist
+        vhosts_path = os.path.join(self.working_directory, 'vhosts')
+        if not os.path.isdir(vhosts_path):
+            logging.info('Creating directory {} for virtual host filesystems.'.format(vhosts_path))
+            os.mkdir(vhosts_path)
+
         hosts = {}
         for host_params in self.config.vhost_params:
-            h = VirtualHost(host_params, self.config.network)
+            h = VirtualHost(host_params, self.config.network, vhosts_path)
             hosts[h.ip_address] = h
         return hosts
 

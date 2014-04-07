@@ -1,0 +1,25 @@
+{
+    "port": 2222,
+    "host": "127.0.0.1",
+    "network": {
+        "network_ip": "192.168.0.0/24",
+        "dns_server": "192.168.0.2",
+        "gateway": "192.168.0.1"
+    },
+    "virtual_hosts": [
+        {
+            "hostname": "test01",
+            "valid_logins": {
+                "test_user1": "password",
+                "test_user2": "password"
+            }
+        },
+        {
+            "hostname": "test02",
+            "valid_logins": {
+                "test_user1": "password",
+                "test_user2": "password"
+            }
+        }
+    ]
+}
