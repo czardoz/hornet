@@ -24,7 +24,8 @@ import shutil
 import gevent.server
 
 import hornet
-from hornet.core.handler import SSHHandler
+from hornet.common.helpers import create_self_signed_cert
+from hornet.core.handler import SSHWrapper
 from hornet.common.config import Config
 from hornet.core.host import VirtualHost
 
@@ -44,6 +45,8 @@ class Hornet(object):
         # Create virtual hosts
         self.vhosts = self._create_vhosts()
 
+        self._check_cert_exits()
+
     def _load_config(self):
         config_path = os.path.join(self.working_directory, 'config.json')
         if not os.path.isfile(config_path):
@@ -60,7 +63,7 @@ class Hornet(object):
         # Create a directory for virtual filesystems, if it doesn't exist
         vhosts_path = os.path.join(self.working_directory, 'vhosts')
         if not os.path.isdir(vhosts_path):
-            logger.info('Creating directory {} for virtual host filesystems.'.format(vhosts_path))
+            logger.info('Creating directory {} for virtual host filesystems'.format(vhosts_path))
             os.mkdir(vhosts_path)
 
         hosts = {}
@@ -69,8 +72,14 @@ class Hornet(object):
             hosts[h.ip_address] = h
         return hosts
 
+    def _check_cert_exits(self):
+        key_file_path = os.path.join(self.working_directory, self.config.key_file)
+        if not os.path.isfile(key_file_path):
+            logger.info('Certificate and Key files not found')
+            create_self_signed_cert(self.working_directory, self.config.cert_file, self.config.key_file)
+
     def start(self):
-        self.handler = SSHHandler(self.vhosts, self.sessions)
+        self.handler = SSHWrapper(self.vhosts, self.sessions, self.config)
         self.server = gevent.server.StreamServer((self.config.host, self.config.port),
                                                  handle=self.handler.handle_session)
         self.server_greenlet = gevent.spawn(self.server.serve_forever)
