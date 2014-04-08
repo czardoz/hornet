@@ -1,5 +1,9 @@
+Crypto
+telnetsrv
 gevent
 paramiko
 netaddr
 fs
 nose
+arrow
+pyopenssl
