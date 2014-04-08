@@ -36,3 +36,5 @@ class Config(object):
                                 cdict['network']['dns_server'], cdict['network']['gateway'])
         self.num_vhosts = len(cdict['virtual_hosts'])
         self.vhost_params = cdict['virtual_hosts']
+        self.key_file = cdict['key_file']
+        self.cert_file = cdict['cert_file']
