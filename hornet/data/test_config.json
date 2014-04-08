@@ -1,6 +1,8 @@
 {
-    "port": 2222,
+    "port": 0,
     "host": "127.0.0.1",
+    "key_file": "test_server.key",
+    "cert_file": "test_server.crt",
     "network": {
         "network_ip": "192.168.0.0/24",
         "dns_server": "192.168.0.2",
