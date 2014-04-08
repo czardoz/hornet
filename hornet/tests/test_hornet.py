@@ -41,7 +41,7 @@ class HornetTests(unittest.TestCase):
 
         honeypot = Hornet(self.working_dir)
         self.assertEquals(honeypot.config.host, '127.0.0.1')
-        self.assertEquals(honeypot.config.port, 2222)
+        self.assertEquals(honeypot.config.port, 0)
         self.assertEquals(len(honeypot.config.vhost_params), 2)
 
     def test_vfs_creation(self):
@@ -53,4 +53,9 @@ class HornetTests(unittest.TestCase):
         for item in os.listdir(vfs_dir):
             self.assertTrue(item.startswith('test'))
 
+    def test_key_creation(self):
+        """ Tests if key file is generated on run. """
 
+        honeypot = Hornet(self.working_dir)
+        key_file_path = os.path.join(self.working_dir, 'test_server.key')
+        self.assertTrue(os.path.isfile(key_file_path))
