@@ -17,10 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gevent
+import gevent.monkey
+gevent.monkey.patch_all()
+
+
 import logging
 import argparse
 import os
-import gevent
 
 from hornet.main import Hornet
 
