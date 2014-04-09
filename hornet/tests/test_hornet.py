@@ -52,6 +52,7 @@ class HornetTests(unittest.TestCase):
         """ Tests whether virtual file systems for each host are created. """
 
         honeypot = Hornet(self.working_dir)
+        honeypot.start()
         vfs_dir = os.path.join(self.working_dir, 'vhosts')
         self.assertTrue(os.path.isdir(vfs_dir))
         for item in os.listdir(vfs_dir):
@@ -62,17 +63,31 @@ class HornetTests(unittest.TestCase):
         """ Tests if key file is generated on run. """
 
         honeypot = Hornet(self.working_dir)
-        key_file_path = os.path.join(self.working_dir, 'test_server.key')
-        self.assertTrue(os.path.isfile(key_file_path))
+        honeypot.start()
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        # Add a sleep here if this test fails for no reason... the server needs time to write the key file
+        self.assertTrue(os.path.isfile(os.path.join(self.working_dir, 'test_server.key')))
         honeypot.stop()
 
     def test_login(self):
         """ Tests whether an SSH client can login to the Honeypot """
 
         honeypot = Hornet(self.working_dir)
-        server_greenlet = honeypot.start()
+        honeypot.start()
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
         port = honeypot.server.server_port
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+        # Add a sleep here if this test fails for no reason
+        data = ''
+        while channel.recv_ready():
+            data += channel.recv(1)
         honeypot.stop()
