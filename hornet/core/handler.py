@@ -19,7 +19,6 @@
 
 import logging
 import os
-import gevent
 from paramiko import SSHException
 
 from telnetsrv.paramiko_ssh import SSHHandler, getRsaKeyFile
@@ -91,4 +90,3 @@ class _SSHHandler(SSHHandler):
                         break
                 if not any_running:
                     break
-            gevent.sleep(0)
