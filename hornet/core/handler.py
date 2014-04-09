@@ -19,7 +19,7 @@
 
 import logging
 import os
-from paramiko import RSAKey, SSHException
+from paramiko import SSHException
 
 from telnetsrv.paramiko_ssh import SSHHandler
 from hornet.common.session import Session
@@ -27,6 +27,8 @@ from hornet.common.shell import Shell
 from hornet.common.helpers import get_rsa_key_file
 
 logger = logging.getLogger(__name__)
+
+AUTH_SUCCESSFUL, AUTH_PARTIALLY_SUCCESSFUL, AUTH_FAILED = range(3)
 
 
 class SSHWrapper(object):
@@ -55,9 +57,6 @@ class SSHWrapper(object):
 
 
 class _SSHHandler(SSHHandler):
-    """
-    Wraps the telnetsrv paramiko module to fit the Honeypot architecture.
-    """
 
     telnet_handler = Shell
 
@@ -66,10 +65,6 @@ class _SSHHandler(SSHHandler):
         request = _SSHHandler.dummy_request()
         request._sock = socket
         super(_SSHHandler, self).__init__(request, client_address, None)
-
-    def authCallbackUsername(self, username):
-        #make sure no one can logon
-        raise
 
     def authCallback(self, username, password):
         logger.info('Login attempt: {} -- {}'.format(username, password))
