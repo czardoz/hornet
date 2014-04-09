@@ -25,7 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class Shell(TelnetHandler):
-    """This class implements the shell functionality for the telnet and SSH capabilities"""
+    """
+        This class implements the shell functionality. It handles the various VirtualHosts and
+        functions as the point of communication for a Session.
+    """
 
     def __init__(self, request, client_address, session):
         self.session = session

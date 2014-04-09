@@ -23,7 +23,7 @@ from paramiko import SSHException
 
 from telnetsrv.paramiko_ssh import SSHHandler
 from hornet.common.session import Session
-from hornet.common.shell import Shell
+from hornet.core.shell import Shell
 from hornet.common.helpers import get_rsa_key_file
 
 logger = logging.getLogger(__name__)
