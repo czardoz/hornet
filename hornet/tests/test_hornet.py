@@ -85,9 +85,6 @@ class HornetTests(unittest.TestCase):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
-        channel = client.invoke_shell()
-        # Add a sleep here if this test fails for no reason
-        data = ''
-        while channel.recv_ready():
-            data += channel.recv(1)
+        # If we log in properly, this should raise no errors
+        client.invoke_shell()
         honeypot.stop()
