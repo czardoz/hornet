@@ -17,10 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import gevent.monkey
+gevent.monkey.patch_all()
+
 import os
 import shutil
 import unittest
 import tempfile
+import paramiko
 
 import hornet
 from hornet.main import Hornet
@@ -52,6 +56,7 @@ class HornetTests(unittest.TestCase):
         self.assertTrue(os.path.isdir(vfs_dir))
         for item in os.listdir(vfs_dir):
             self.assertTrue(item.startswith('test'))
+        honeypot.stop()
 
     def test_key_creation(self):
         """ Tests if key file is generated on run. """
@@ -59,3 +64,15 @@ class HornetTests(unittest.TestCase):
         honeypot = Hornet(self.working_dir)
         key_file_path = os.path.join(self.working_dir, 'test_server.key')
         self.assertTrue(os.path.isfile(key_file_path))
+        honeypot.stop()
+
+    def test_login(self):
+        """ Tests whether an SSH client can login to the Honeypot """
+
+        honeypot = Hornet(self.working_dir)
+        server_greenlet = honeypot.start()
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        honeypot.stop()
