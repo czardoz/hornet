@@ -84,3 +84,7 @@ class Hornet(object):
                                                  handle=self.handler.handle_session)
         self.server_greenlet = gevent.spawn(self.server.serve_forever)
         return self.server_greenlet
+
+    def stop(self):
+        logging.debug('Stopping the server')
+        self.server.stop()
