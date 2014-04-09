@@ -19,11 +19,12 @@
 
 import logging
 import os
-from paramiko import SSHException
+from paramiko import RSAKey, SSHException
 
-from telnetsrv.paramiko_ssh import SSHHandler, getRsaKeyFile
+from telnetsrv.paramiko_ssh import SSHHandler
 from hornet.common.session import Session
 from hornet.common.shell import Shell
+from hornet.common.helpers import get_rsa_key_file
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +33,11 @@ class SSHWrapper(object):
 
     """ Helper class to pass the client socket to _SSHHandler """
 
-    def __init__(self, vhosts, sessions, config):
+    def __init__(self, vhosts, sessions, config, working_directory):
         self.vhosts = vhosts
         self.sessions = sessions
         self.config = config
+        self.working_directory = working_directory
 
     def handle_session(self, client_socket, client_address):
         current_session = Session(client_address)
@@ -43,8 +45,8 @@ class SSHWrapper(object):
         logger.info('Connection from {}, {}'.format(client_address, client_socket))
 
         # Set the host_key attribute on our _SSHHandler class
-        key_file_path = os.path.join(os.getcwd(), self.config.key_file)
-        _SSHHandler.host_key = getRsaKeyFile(key_file_path)
+        key_file_path = os.path.join(self.working_directory, self.config.key_file)
+        _SSHHandler.host_key = get_rsa_key_file(key_file_path)
 
         try:
             _SSHHandler(current_session, client_socket, client_address)
