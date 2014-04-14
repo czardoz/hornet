@@ -18,6 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import netaddr
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Network(netaddr.IPNetwork):
@@ -37,3 +40,12 @@ class Config(object):
         self.num_vhosts = len(cdict['virtual_hosts'])
         self.vhost_params = cdict['virtual_hosts']
         self.key_file = cdict['key_file']
+
+        self.default_hostname = None
+        for p in self.vhost_params:
+            if p.get('default', False):
+                logger.debug('Default host set to: {}'.format(p['hostname']))
+                self.default_hostname = p['hostname']
+        if self.default_hostname is None:
+            logger.info('Default host not found, setting {} to default.'.format(self.vhost_params[0]['hostname']))
+            self.default_hostname = self.vhost_params[0]['hostname']
