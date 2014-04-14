@@ -28,6 +28,10 @@ class VirtualHost(object):
         self.ip_address = str(random.choice(list(network[1:-1])))
         self.hostname = params['hostname']
         self.valid_logins = params['valid_logins']
+        if params.get('default', False):
+            self.default = True
+        else:
+            self.default = False
         self.filesystem = OSFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
 
     def authenticate(self, username, password):
