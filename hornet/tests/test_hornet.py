@@ -46,10 +46,11 @@ class HornetTests(unittest.TestCase):
         honeypot = Hornet(self.working_dir)
         self.assertEquals(honeypot.config.host, '127.0.0.1')
         self.assertEquals(honeypot.config.port, 0)
+        self.assertEquals(honeypot.config.default_hostname, 'test02')
         self.assertEquals(len(honeypot.config.vhost_params), 3)
 
     def test_vfs_creation(self):
-        """ Tests whether virtual file systems for each host are created. """
+        """ Tests whether virtual file systems for each host are created """
 
         honeypot = Hornet(self.working_dir)
         honeypot.start()
@@ -60,7 +61,7 @@ class HornetTests(unittest.TestCase):
         honeypot.stop()
 
     def test_key_creation(self):
-        """ Tests if key file is generated on run. """
+        """ Tests if key file is generated on run """
 
         honeypot = Hornet(self.working_dir)
         honeypot.start()
@@ -87,3 +88,14 @@ class HornetTests(unittest.TestCase):
         # If we log in properly, this should raise no errors
         client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
         honeypot.stop()
+
+    def test_vhost_creation(self):
+        """ Tests whether virtual hosts are created properly """
+
+        honeypot = Hornet(self.working_dir)
+        self.assertEquals(len(honeypot.vhosts), 3)
+        default = None
+        for hostname, host in honeypot.vhosts.iteritems():
+            if host.default:
+                default = host
+        self.assertFalse(default is None)
