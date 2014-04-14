@@ -26,5 +26,6 @@ class Session(object):
     def __init__(self, client_address):
         self.id = uuid.uuid4()
         self.start_time = arrow.now().timestamp
+        self.client_address = client_address
         self.end_time = None
         self.live = True
