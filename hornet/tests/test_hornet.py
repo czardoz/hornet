@@ -34,7 +34,7 @@ class HornetTests(unittest.TestCase):
 
     def setUp(self):
         self.working_dir = tempfile.mkdtemp()
-        test_config = os.path.join(os.path.dirname(hornet.__file__), 'data', 'test_config.json')
+        test_config = os.path.join(os.path.dirname(hornet.__file__), 'data', 'default_config.json')
         shutil.copyfile(test_config, os.path.join(self.working_dir, 'config.json'))
 
     def tearDown(self):
@@ -46,7 +46,7 @@ class HornetTests(unittest.TestCase):
         honeypot = Hornet(self.working_dir)
         self.assertEquals(honeypot.config.host, '127.0.0.1')
         self.assertEquals(honeypot.config.port, 0)
-        self.assertEquals(len(honeypot.config.vhost_params), 2)
+        self.assertEquals(len(honeypot.config.vhost_params), 3)
 
     def test_vfs_creation(self):
         """ Tests whether virtual file systems for each host are created. """
