@@ -16,7 +16,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import logging
+import random
 
 from paramiko import RSAKey
 
@@ -31,3 +33,12 @@ def get_rsa_key_file(filename, password=None):
         key = RSAKey.generate(1024)
         key.write_private_key_file(filename, password=password)
     return key
+
+
+def get_random_item(collection):
+    if isinstance(collection, dict):
+        all_keys = list(collection.keys())
+        r = random.choice(all_keys)
+        return collection[r]
+    elif isinstance(collection, list):
+        return random.choice(collection)
