@@ -13,13 +13,26 @@
             "valid_logins": {
                 "admin": "admin123",
                 "root": "toor"
+            },
+            "env": {
+                "BROWSER": "firefox",
+                "EDITOR": "gedit",
+                "SHELL": "/bin/bash",
+                "PAGER": "less"
             }
         },
         {
             "hostname": "test02",
             "valid_logins": {
                 "mango": "apple",
-                "vstfpd": "1q2w3e4r"
+                "vstfpd": "1q2w3e4r",
+                "testuser": "testpassword"
+            },
+            "env": {
+                "BROWSER": "firefox",
+                "EDITOR": "gedit",
+                "SHELL": "/bin/bash",
+                "PAGER": "less"
             },
             "default": true
         },
@@ -29,6 +42,12 @@
                 "administrator": "qwerty",
                 "httpd": "httpd",
                 "root": "s3cr3t"
+            },
+            "env": {
+                "BROWSER": "firefox",
+                "EDITOR": "gedit",
+                "SHELL": "/bin/bash",
+                "PAGER": "less"
             }
         }
     ]
