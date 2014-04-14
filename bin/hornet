@@ -32,6 +32,15 @@ __version_tuple__ = (0, 0, 1)
 __version__ = '.'.join(map(str, __version_tuple__))
 
 
+class LogFilter(logging.Filter):
+
+    def filter(self, record):
+        if record.name.startswith('paramiko'):
+            return False
+        else:
+            return True
+
+
 def setup_logging(verbose=False):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
@@ -40,8 +49,10 @@ def setup_logging(verbose=False):
         log_level = logging.DEBUG
     else:
         log_level = logging.WARNING
+
     formatter = logging.Formatter('%(asctime)s (%(name)s) %(message)s')
     console_handler.setFormatter(formatter)
+    console_handler.addFilter(LogFilter())
     console_handler.setLevel(log_level)
     root_logger.addHandler(console_handler)
 
