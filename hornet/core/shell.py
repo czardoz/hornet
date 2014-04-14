@@ -30,9 +30,9 @@ class Shell(TelnetHandler):
         functions as the point of communication for a Session.
     """
 
-    def __init__(self, request, client_address, session):
+    def __init__(self, request, client_address, server, session):
         self.session = session
-        TelnetHandler.__init__(self, request, client_address, None)
+        TelnetHandler.__init__(self, request, client_address, server)
 
     @command('echo')
     def command_echo(self, params):
