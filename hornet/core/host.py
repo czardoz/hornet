@@ -29,3 +29,8 @@ class VirtualHost(object):
         self.hostname = params['hostname']
         self.valid_logins = params['valid_logins']
         self.filesystem = OSFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
+
+    def authenticate(self, username, password):
+        if self.valid_logins.get(username, None) == password:
+            return True
+        return False
