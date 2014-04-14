@@ -19,7 +19,7 @@
 
 import logging
 
-from telnetsrv.green import TelnetHandler, command
+from telnetsrv.green import TelnetHandler
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +30,41 @@ class Shell(TelnetHandler):
         functions as the point of communication for a Session.
     """
 
-    def __init__(self, request, client_address, server, session):
+    def __init__(self, request, client_address, server, session, vhosts):
         self.session = session
+        self.vhosts = vhosts
+        self.login_stack = []
+        self.logging = logger
+        self.current_host = None
+        for h in vhosts:
+            if vhosts[h].default:
+                self._set_host(vhosts[h])
+                break
         TelnetHandler.__init__(self, request, client_address, server)
 
-    @command('echo')
-    def command_echo(self, params):
-        self.writeline(' '.join(params))
+    def _set_host(self, host):
+        self.login_stack.append(host)
+        self.current_host = host
+        self.PROMPT = '{}@{}:{}$ '.format(self.current_host.current_user, self.current_host.hostname,
+                                          self.current_host.working_path)
+        self.WELCOME = self.current_host.welcome
+
+    def handle(self):
+        if not self.authentication_ok():
+            return
+        if self.DOECHO:
+            self.writeline(self.WELCOME)
+        self.session_start()
+        while self.RUNSHELL:
+            raw_input_ = self.readline(prompt=self.PROMPT).strip()
+            self.input = self.input_reader(self, raw_input_)
+            self.raw_input = self.input.raw
+            if self.input.cmd:
+                cmd = self.input.cmd
+                params = self.input.params
+                try:
+                    command = getattr(self.current_host, 'run_' + cmd)
+                    command(params, self)
+                except:
+                    self.writeerror("{}: command not found".format(cmd))
+        self.logging.debug("Exiting handler")

@@ -51,7 +51,7 @@ class SSHWrapper(object):
         _SSHHandler.host_key = get_rsa_key_file(key_file_path)
 
         try:
-            _SSHHandler(current_session, client_socket, client_address)
+            _SSHHandler(current_session, client_socket, client_address, self.vhosts)
         except SSHException:
             logging.error('SSH Session {} ended unexpectedly'.format(current_session.id))
 
@@ -60,15 +60,26 @@ class _SSHHandler(SSHHandler):
 
     telnet_handler = Shell
 
-    def __init__(self, session, socket, client_address):
+    def __init__(self, session, socket, client_address, vhosts):
         self.session = session
+        self.vhosts = vhosts
         request = _SSHHandler.dummy_request()
         request._sock = socket
         super(_SSHHandler, self).__init__(request, client_address, None)
 
+    def authCallbackUsername(self, username):
+        raise  # Disable username based logins.
+
     def authCallback(self, username, password):
         logger.info('Login attempt: {} -- {}'.format(username, password))
-        return True
+        default = None
+        for hostname, host in self.vhosts.iteritems():
+            if host.default:
+                default = host
+        if default.login(username, password):
+            return True
+        else:
+            raise Exception('Bad username/password')
 
     def setup(self):
 
@@ -97,7 +108,7 @@ class _SSHHandler(SSHHandler):
         request.username = self.username
 
         # This should block until the user quits the pty
-        self.pty_handler(request, self.client_address, self.tcp_server, self.session)
+        self.pty_handler(request, self.client_address, self.tcp_server, self.session, self.vhosts)
 
         # Shutdown the entire session
         self.transport.close()
