@@ -31,6 +31,8 @@ class VirtualHost(object):
         self.hostname = params['hostname']
         self.ip_address = None
         self.env = params['env']
+
+        # Check if this virtualhost has been previously configured
         for directory in os.listdir(fs_dir):
             if directory.startswith(self.hostname):
                 self.ip_address = directory.split('_', 1)[1]
