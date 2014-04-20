@@ -73,7 +73,7 @@ class Hornet(object):
         self.handler = SSHWrapper(self.vhosts, self.sessions, self.config, self.working_directory)
         self.server = gevent.server.StreamServer((self.config.host, self.config.port),
                                                  handle=self.handler.handle_session)
-        self.server_greenlet = gevent.spawn(self.server.serve_forever)
+        self.server_greenlet = gevent.spawn(self.server.start)
         return self.server_greenlet
 
     def stop(self):

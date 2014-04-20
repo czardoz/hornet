@@ -72,7 +72,7 @@ class HornetTests(unittest.TestCase):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
         # Add a sleep here if this test fails for no reason... the server needs time to write the key file
-        gevent.sleep(1)
+        # gevent.sleep(1)
         self.assertTrue(os.path.isfile(os.path.join(self.working_dir, 'test_server.key')))
         honeypot.stop()
 
@@ -88,7 +88,7 @@ class HornetTests(unittest.TestCase):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # If we log in properly, this should raise no errors
         client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
-        gevent.sleep(1)
+        # gevent.sleep(1)
         honeypot.stop()
 
     def test_vhost_creation(self):
