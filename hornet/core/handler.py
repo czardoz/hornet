@@ -87,7 +87,7 @@ class _SSHHandler(SSHHandler):
         self.transport.add_server_key(self.host_key)
         self.transport.start_server(server=self)
 
-        while True:
+        while True:  # pragma: no cover
             channel = self.transport.accept(20)
             if channel is None:
                 # check to see if any thread is running
@@ -99,7 +99,7 @@ class _SSHHandler(SSHHandler):
                 if not any_running:
                     break
 
-    def start_pty_request(self, channel, term, modes):
+    def start_pty_request(self, channel, term, modes):  # pragma: no cover
         """ Start a PTY - intended to run it a (green)thread. """
         request = self.dummy_request()
         request._sock = channel

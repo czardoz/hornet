@@ -5,6 +5,5 @@ omit =
 [report]
 exclude_lines=
     pragma: no cover
-    def start_pty_request
     except
     raise
