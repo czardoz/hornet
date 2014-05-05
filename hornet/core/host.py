@@ -61,7 +61,7 @@ class VirtualHost(object):
             self.logged_in = True
             self.current_user = username
             return True
-        else:
+        else:  # pragma: no cover
             logger.debug('User "{}" has tried to login to "{}" host, password was "{}"'.format(username, self.hostname,
                                                                                                password))
             return False
