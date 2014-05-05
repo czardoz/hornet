@@ -71,7 +71,6 @@ class _SSHHandler(SSHHandler):
         raise  # Disable username based logins.
 
     def authCallback(self, username, password):
-        logger.info('Login attempt: {} -- {}'.format(username, password))
         default = None
         for hostname, host in self.vhosts.iteritems():
             if host.default:
