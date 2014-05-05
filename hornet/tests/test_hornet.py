@@ -76,7 +76,7 @@ class HornetTests(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.working_dir, 'test_server.key')))
         honeypot.stop()
 
-    def test_login(self):
+    def test_login_success(self):
         """ Tests whether an SSH client can login to the Honeypot """
 
         honeypot = Hornet(self.working_dir)
@@ -88,7 +88,22 @@ class HornetTests(unittest.TestCase):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         # If we log in properly, this should raise no errors
         client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
-        # gevent.sleep(1)
+        gevent.sleep(1)
+        honeypot.stop()
+
+    def test_login_failure(self):
+        """ Tests whether an SSH client login fails on bad credentials """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        with self.assertRaises(paramiko.AuthenticationException):
+            client.connect('127.0.0.1', port=port, username='aksjd', password='asjdhkasd')
+        gevent.sleep(1)
         honeypot.stop()
 
     def test_vhost_creation(self):

@@ -40,11 +40,17 @@ class HornetTests(unittest.TestCase):
         shutil.rmtree(self.working_dir)
 
     def test_ip_assignment(self):
+        """
+            Tests whether IP addresses are assigned to each host.
+        """
         honeypot = Hornet(self.working_dir)
         for ip, host in honeypot.vhosts.iteritems():
             self.assertEquals(host.ip_address, ip)
 
     def test_welcome_message(self):
+        """
+            Tests whether a virtual host loads a default welcome message
+        """
         honeypot = Hornet(self.working_dir)
         for ip, host in honeypot.vhosts.iteritems():
             self.assertTrue(host.welcome.startswith('Welcome to '))
