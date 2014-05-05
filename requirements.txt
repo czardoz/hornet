@@ -1,4 +1,4 @@
-telnetsrv
+git+https://github.com/ianepperson/telnetsrvlib
 gevent
 paramiko
 netaddr

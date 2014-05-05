@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-
 from telnetsrv.green import TelnetHandler
 
 logger = logging.getLogger(__name__)
@@ -49,7 +48,7 @@ class Shell(TelnetHandler):
                                           self.current_host.working_path)
         self.WELCOME = self.current_host.welcome
 
-    def handle(self):
+    def handle(self):  # pragma: no cover
         if not self.authentication_ok():
             return
         if self.DOECHO:
