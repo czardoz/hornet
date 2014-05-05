@@ -73,7 +73,10 @@ class Hornet(object):
         self.handler = SSHWrapper(self.vhosts, self.sessions, self.config, self.working_directory)
         self.server = gevent.server.StreamServer((self.config.host, self.config.port),
                                                  handle=self.handler.handle_session)
-        self.server_greenlet = gevent.spawn(self.server.start)
+        self.server_greenlet = gevent.spawn(self.server.serve_forever)
+        while self.server.server_port == 0:
+            gevent.sleep(0)  # Bad way of waiting, but can't think of anything right now.
+        logger.info('SSH server listening on {}:{}'.format(self.server.server_host, self.server.server_port))
         return self.server_greenlet
 
     def stop(self):
