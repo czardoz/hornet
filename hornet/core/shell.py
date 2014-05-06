@@ -37,11 +37,11 @@ class Shell(TelnetHandler):
         self.current_host = None
         for h in vhosts:
             if vhosts[h].default:
-                self._set_host(vhosts[h])
+                self.set_host(vhosts[h])
                 break
         TelnetHandler.__init__(self, request, client_address, server)
 
-    def _set_host(self, host):
+    def set_host(self, host):
         self.login_stack.append(host)
         self.current_host = host
         self.PROMPT = '{}@{}:{}$ '.format(self.current_host.current_user, self.current_host.hostname,
