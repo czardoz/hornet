@@ -116,3 +116,11 @@ class HornetTests(unittest.TestCase):
             if host.default:
                 default = host
         self.assertFalse(default is None)
+
+    def test_config_copying(self):
+        """ Tests whether Hornet can copy the default configuration file"""
+
+        os.remove(os.path.join(self.working_dir, 'config.json'))
+        self.assertFalse(os.path.isfile(os.path.join(self.working_dir, 'config.json')))
+        honeypot = Hornet(self.working_dir)
+        self.assertTrue(os.path.isfile(os.path.join(self.working_dir, 'config.json')))
