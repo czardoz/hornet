@@ -48,7 +48,7 @@ class VirtualHost(object):
         else:
             self.default = False
         self.filesystem = OSFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
-        self.working_path = '/'
+        self.working_path = '~'
 
     def authenticate(self, username, password):
         if self.valid_logins.get(username, None) == password:

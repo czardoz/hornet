@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gevent.monkey
+from hornet.common.helpers import get_random_item
+
 gevent.monkey.patch_all()
 
 import os
@@ -47,10 +49,20 @@ class HornetTests(unittest.TestCase):
         for ip, host in honeypot.vhosts.iteritems():
             self.assertEquals(host.ip_address, ip)
 
-    def test_welcome_message(self):
+    def test_default_welcome_message(self):
         """
             Tests whether a virtual host loads a default welcome message
         """
         honeypot = Hornet(self.working_dir)
         for ip, host in honeypot.vhosts.iteritems():
             self.assertTrue(host.welcome.startswith('Welcome to '))
+
+    def test_custom_welcome_message(self):
+
+        honeypot = Hornet(self.working_dir)
+        random_host = get_random_item(honeypot.vhosts)
+        random_host.filesystem.makedir('/etc')
+        with random_host.filesystem.open('/etc/motd', 'w') as motd_file:
+            motd_file.write(u'TestingCustomWelcomeMessage')
+        self.assertEquals(random_host.welcome, u'TestingCustomWelcomeMessage')
+
