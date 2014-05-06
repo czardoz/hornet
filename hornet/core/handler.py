@@ -28,8 +28,6 @@ from hornet.common.helpers import get_rsa_key_file
 
 logger = logging.getLogger(__name__)
 
-AUTH_SUCCESSFUL, AUTH_PARTIALLY_SUCCESSFUL, AUTH_FAILED = range(3)
-
 
 class SSHWrapper(object):
 
