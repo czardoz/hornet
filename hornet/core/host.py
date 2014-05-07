@@ -86,3 +86,5 @@ class VirtualHost(object):
             params.remove('*')
             params.extend(self.filesystem.listdir())
             shell.writeline(' '.join(params))
+        else:
+            shell.writeline(' '.join(params))
