@@ -77,7 +77,6 @@ class VirtualHost(object):
     def run_echo(self, params, shell):
         if not params:
             shell.writeline('')
-            return
         elif params[0].startswith('$') and len(params) == 1:
             var_name = params[0][1:]
             value = self.env.get(var_name, '')

@@ -66,7 +66,7 @@ class Hornet(object):
         hosts = {}
         for host_params in self.config.vhost_params:
             h = VirtualHost(host_params, self.config.network, vhosts_path)
-            hosts[h.ip_address] = h
+            hosts[h.hostname] = h
         return hosts
 
     def start(self):
