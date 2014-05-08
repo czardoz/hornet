@@ -73,7 +73,7 @@ class _SSHHandler(SSHHandler):
         for hostname, host in self.vhosts.iteritems():
             if host.default:
                 default = host
-        if default.login(username, password):
+        if default.authenticate(username, password):
             return True
         else:
             raise Exception('Bad username/password')
