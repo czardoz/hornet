@@ -28,6 +28,8 @@ class Shell(TelnetHandler):
         This class implements the shell functionality. It handles the various VirtualHosts and
         functions as the point of communication for a Session.
     """
+    PROMPT = ''
+    WELCOME = ''
 
     def __init__(self, request, client_address, server, session, vhosts):
         self.session = session
@@ -35,22 +37,19 @@ class Shell(TelnetHandler):
         self.login_stack = []
         self.logging = logger
         self.current_host = None
-        for h in vhosts:
-            if vhosts[h].default:
-                self.set_host(vhosts[h])
-                break
         TelnetHandler.__init__(self, request, client_address, server)
 
     def set_host(self, host):
         self.login_stack.append(host)
         self.current_host = host
-        self.PROMPT = '{}@{}:{}$ '.format(self.current_host.current_user, self.current_host.hostname,
-                                          self.current_host.working_path)
+        self.PROMPT = self.current_host.prompt
         self.WELCOME = self.current_host.welcome
 
     def handle(self):  # pragma: no cover
         if not self.authentication_ok():
             return
+
+
         if self.DOECHO:
             self.writeline(self.WELCOME)
         self.session_start()

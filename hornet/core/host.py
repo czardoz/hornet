@@ -77,6 +77,11 @@ class VirtualHost(object):
         else:
             return 'Welcome to {} server.'.format(self.hostname)
 
+    @property
+    def prompt(self):
+        prompt = '{}@{}:{}$ '.format(self.current_user, self.hostname, self.working_path)
+        return prompt
+
     def run_echo(self, params, shell):
         if not params:
             shell.writeline('')
