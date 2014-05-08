@@ -20,7 +20,7 @@
                 "SHELL": "/bin/bash",
                 "PAGER": "less"
             },
-            "ip_address": "192.168.0.111"
+            "ip_address": null
         },
         {
             "hostname": "test02",
@@ -51,7 +51,7 @@
                 "SHELL": "/bin/bash",
                 "PAGER": "less"
             },
-            "ip_address": "192.168.0.9"
+            "ip_address": "192.168.0.443"
         }
     ]
 }

@@ -41,7 +41,7 @@ class VirtualHost(object):
                 logger.error('IP Address {} for {} is not valid for the specified network, '
                              'assigning random IP'.format(params['ip_address'], self.hostname))
                 self.ip_address = get_random_item(valid_ips)
-                logger.info('Assigned IP {} to host {}'.format())
+                logger.info('Assigned IP {} to host {}'.format(self.ip_address, self.hostname))
 
         self.valid_logins = params['valid_logins']
         self.logged_in = False
