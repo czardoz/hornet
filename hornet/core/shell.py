@@ -42,6 +42,7 @@ class Shell(TelnetHandler):
     def set_host(self, host):
         self.login_stack.append(host)
         self.current_host = host
+        self.current_host.login(self.username, self)
         self.PROMPT = self.current_host.prompt
         self.WELCOME = self.current_host.welcome
 
@@ -49,9 +50,12 @@ class Shell(TelnetHandler):
         if not self.authentication_ok():
             return
 
-
-        if self.DOECHO:
-            self.writeline(self.WELCOME)
+        default_host = None
+        for _, host in self.vhosts.iteritems():
+            if host.default:
+                default_host = host
+                break
+        self.set_host(default_host)
         self.session_start()
         while self.RUNSHELL:
             raw_input_ = self.readline(prompt=self.PROMPT).strip()
