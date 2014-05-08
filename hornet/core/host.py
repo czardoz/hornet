@@ -58,16 +58,11 @@ class VirtualHost(object):
             return True
         return False
 
-    def login(self, username, password):
-        if self.authenticate(username, password):
-            logger.debug('User "{}" has logged into "{}" host'.format(username, self.hostname))
-            self.logged_in = True
-            self.current_user = username
-            return True
-        else:  # pragma: no cover
-            logger.debug('User "{}" has tried to login to "{}" host, password was "{}"'.format(username, self.hostname,
-                                                                                               password))
-            return False
+    def login(self, username, shell):
+        logger.debug('User "{}" has logged into "{}" host'.format(username, self.hostname))
+        self.logged_in = True
+        self.current_user = username
+        shell.writeline(self.welcome)
 
     @property
     def welcome(self):
