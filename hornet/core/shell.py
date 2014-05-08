@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import traceback
+
 from telnetsrv.green import TelnetHandler
 
 logger = logging.getLogger(__name__)
@@ -66,5 +68,6 @@ class Shell(TelnetHandler):
                     command = getattr(self.current_host, 'run_' + cmd)
                     command(params, self)
                 except:
+                    logger.error(traceback.print_exc())
                     self.writeerror("{}: command not found".format(cmd))
         self.logging.debug("Exiting handler")
