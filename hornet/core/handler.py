@@ -49,7 +49,7 @@ class SSHWrapper(object):
         _SSHHandler.host_key = get_rsa_key_file(key_file_path)
 
         try:
-            _SSHHandler(current_session, client_socket, client_address, self.vhosts)
+            _SSHHandler(current_session, client_socket, client_address, self.vhosts, self.config)
         except SSHException:
             logging.error('SSH Session {} ended unexpectedly'.format(current_session.id))
 
@@ -58,9 +58,10 @@ class _SSHHandler(SSHHandler):
 
     telnet_handler = Shell
 
-    def __init__(self, session, socket, client_address, vhosts):
+    def __init__(self, session, socket, client_address, vhosts, config):
         self.session = session
         self.vhosts = vhosts
+        self.config = config
         request = _SSHHandler.dummy_request()
         request._sock = socket
         super(_SSHHandler, self).__init__(request, client_address, None)
@@ -105,7 +106,7 @@ class _SSHHandler(SSHHandler):
         request.username = self.username
 
         # This should block until the user quits the pty
-        self.pty_handler(request, self.client_address, self.tcp_server, self.session, self.vhosts)
+        self.pty_handler(request, self.client_address, self.tcp_server, self.session, self.vhosts, self.config)
 
         # Shutdown the entire session
         self.transport.close()

@@ -31,12 +31,13 @@ class Shell(TelnetHandler):
     PROMPT = ''
     WELCOME = ''
 
-    def __init__(self, request, client_address, server, session, vhosts):
+    def __init__(self, request, client_address, server, session, vhosts, config):
         self.session = session
         self.vhosts = vhosts
         self.login_stack = []
         self.logging = logger
         self.current_host = None
+        self.config = config
         TelnetHandler.__init__(self, request, client_address, server)
 
     def set_host(self, host):
@@ -47,14 +48,11 @@ class Shell(TelnetHandler):
         self.WELCOME = self.current_host.welcome
 
     def handle(self):  # pragma: no cover
+
         if not self.authentication_ok():
             return
 
-        default_host = None
-        for _, host in self.vhosts.iteritems():
-            if host.default:
-                default_host = host
-                break
+        default_host = self.vhosts[self.config.default_hostname]
         self.set_host(default_host)
         self.session_start()
         while self.RUNSHELL:
