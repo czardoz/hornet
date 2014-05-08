@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import argparse
 import os
 
 from fs.osfs import OSFS
@@ -90,3 +91,31 @@ class VirtualHost(object):
             shell.writeline(' '.join(params))
         else:
             shell.writeline(' '.join(params))
+
+    def run_ssh(self, params, shell):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-p', dest='port', default=22, type=int)
+        parser.add_argument('-l', dest='username')
+        parser.add_argument('host_string')
+        args = parser.parse_args(params)
+
+        username = args.username
+        if username is None:
+            try:
+                username, _ = args.host_string.split('@')
+            except ValueError:
+                username = self.current_user
+        if '@' in args.host_string:
+            _, hostname = args.host_string.split('@')
+        else:
+            hostname = args.host_string
+        if not hostname in shell.vhosts:
+            shell.writeline('ssh: Could not resolve hostname {}: Name or service not known'.format(hostname))
+            return
+
+        # Hostname is valid. Now get the password.
+        new_host = shell.vhosts[hostname]
+        password = shell.readline(echo=False, prompt=shell.PROMPT_PASS, use_history=False)
+        if new_host.authenticate(username, password):
+            new_host.login(username, shell)
+            shell.set_host(new_host)

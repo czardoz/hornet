@@ -42,10 +42,11 @@ class Shell(TelnetHandler):
         self.config = config
         TelnetHandler.__init__(self, request, client_address, server)
 
-    def set_host(self, host):
+    def set_host(self, host, default=False):
         self.login_stack.append(host)
         self.current_host = host
-        self.current_host.login(self.username, self)
+        if default:
+            self.current_host.login(self.username, self)
         self.PROMPT = self.current_host.prompt
         self.WELCOME = self.current_host.welcome
 
@@ -55,7 +56,7 @@ class Shell(TelnetHandler):
             return
 
         default_host = self.vhosts[self.config.default_hostname]
-        self.set_host(default_host)
+        self.set_host(default_host, default=True)
         self.session_start()
         while self.RUNSHELL:
             raw_input_ = self.readline(prompt=self.PROMPT).strip()
