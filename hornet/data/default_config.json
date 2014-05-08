@@ -19,7 +19,8 @@
                 "EDITOR": "gedit",
                 "SHELL": "/bin/bash",
                 "PAGER": "less"
-            }
+            },
+            "ip_address": "192.168.0.111"
         },
         {
             "hostname": "test02",
@@ -34,7 +35,8 @@
                 "SHELL": "/bin/bash",
                 "PAGER": "less"
             },
-            "default": true
+            "default": true,
+            "ip_address": "192.168.0.232"
         },
         {
             "hostname": "test03",
@@ -48,7 +50,8 @@
                 "EDITOR": "gedit",
                 "SHELL": "/bin/bash",
                 "PAGER": "less"
-            }
+            },
+            "ip_address": "192.168.0.9"
         }
     ]
 }

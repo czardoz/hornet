@@ -18,9 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import random
 import os
+
 from fs.osfs import OSFS
+from hornet.common.helpers import get_random_item
 
 logger = logging.getLogger(__name__)
 
@@ -29,16 +30,18 @@ class VirtualHost(object):
 
     def __init__(self, params, network, fs_dir):
         self.hostname = params['hostname']
-        self.ip_address = None
+        self.ip_address = params['ip_address']
         self.env = params['env']
 
-        # Check if this virtualhost has been previously configured
-        for directory in os.listdir(fs_dir):
-            if directory.startswith(self.hostname):
-                self.ip_address = directory.split('_', 1)[1]
-                break
+        valid_ips = map(str, network[1:-1])
         if self.ip_address is None:
-            self.ip_address = str(random.choice(list(network[1:-1])))
+            self.ip_address = get_random_item(valid_ips)
+        else:
+            if not self.ip_address in valid_ips:
+                logger.error('IP Address {} for {} is not valid for the specified network, '
+                             'assigning random IP'.format(params['ip_address'], self.hostname))
+                self.ip_address = get_random_item(valid_ips)
+                logger.info('Assigned IP {} to host {}'.format())
 
         self.valid_logins = params['valid_logins']
         self.logged_in = False

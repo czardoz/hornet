@@ -36,7 +36,7 @@ class Config(object):
         self.port = cdict['port']
         self.host = cdict['host']
         self.network = Network(cdict['network']['network_ip'],
-                                cdict['network']['dns_server'], cdict['network']['gateway'])
+                               cdict['network']['dns_server'], cdict['network']['gateway'])
         self.num_vhosts = len(cdict['virtual_hosts'])
         self.vhost_params = cdict['virtual_hosts']
         self.key_file = cdict['key_file']
