@@ -119,3 +119,8 @@ class VirtualHost(object):
         if new_host.authenticate(username, password):
             new_host.login(username, shell)
             shell.set_host(new_host)
+
+    def run_logout(self, params, shell):
+        shell.login_stack = shell.login_stack[:-1]
+        prev_host = shell.login_stack[-1]
+        shell.set_host(prev_host)

@@ -68,6 +68,9 @@ class Shell(TelnetHandler):
                 try:
                     command = getattr(self.current_host, 'run_' + cmd)
                     command(params, self)
+                except AttributeError:
+                    # User entered something we have not implemented.
+                    self.writeerror("{}: command not found".format(cmd))
                 except:
                     logger.error(traceback.print_exc())
                     self.writeerror("{}: command not found".format(cmd))
