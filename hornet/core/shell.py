@@ -16,7 +16,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import argparse
+import curses
 
 import logging
 import traceback
@@ -119,3 +121,27 @@ class Shell(TelnetHandler):
         del self.login_stack[-1]
         prev_host = self.login_stack[-1]
         self.set_host(prev_host)
+
+    def setterm(self, term):
+        "Set the curses structures for this terminal"
+        logger.debug("Setting termtype to %s" % (term, ))
+        try:
+            curses.setupterm(term) # This will raise if the termtype is not supported
+        except TypeError:
+            file_ = open('/dev/null', 'w')
+            dummyfd = file_.fileno()
+            curses.setupterm(term, fd=dummyfd)
+
+        self.TERM = term
+        self.ESCSEQ = {}
+        for k in self.KEYS.keys():
+            str = curses.tigetstr(curses.has_key._capability_names[k])
+            if str:
+                self.ESCSEQ[str] = k
+        # Create a copy to prevent altering the class
+        self.CODES = self.CODES.copy()
+        self.CODES['DEOL'] = curses.tigetstr('el')
+        self.CODES['DEL'] = curses.tigetstr('dch1')
+        self.CODES['INS'] = curses.tigetstr('ich1')
+        self.CODES['CSRLEFT'] = curses.tigetstr('cub1')
+        self.CODES['CSRRIGHT'] = curses.tigetstr('cuf1')

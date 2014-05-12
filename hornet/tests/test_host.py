@@ -18,11 +18,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gevent.monkey
-import paramiko
-from hornet.common.helpers import get_random_item
-
 gevent.monkey.patch_all()
 
+import paramiko
 import os
 import shutil
 import unittest
@@ -30,6 +28,7 @@ import tempfile
 
 import hornet
 from hornet.main import Hornet
+from hornet.common.helpers import get_random_item
 
 
 class HornetTests(unittest.TestCase):

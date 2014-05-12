@@ -18,17 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gevent.monkey
-import paramiko
-from hornet.main import Hornet
-
 gevent.monkey.patch_all()
 
+import paramiko
 import os
 import shutil
 import unittest
 import tempfile
 
 import hornet
+from hornet.main import Hornet
 
 
 class HornetTests(unittest.TestCase):
@@ -202,5 +201,43 @@ class HornetTests(unittest.TestCase):
         while not output.endswith('$ '):
             output += channel.recv(1)
         self.assertTrue('Welcome to test01 server' in output)
+        self.assertTrue(output.endswith('$ '))
+        honeypot.stop()
+
+    def test_ssh_bad_hostname(self):
+        """ Tests if ssh command returns correct string if host doesn't exist
+            eg: $ ssh test01 -l mango
+        """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the ssh command
+        channel.send('ssh blahblah\r\n')
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+        self.assertTrue('Name or service not known' in output)
         self.assertTrue(output.endswith('$ '))
         honeypot.stop()
