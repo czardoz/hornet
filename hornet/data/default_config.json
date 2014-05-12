@@ -12,7 +12,8 @@
             "hostname": "test01",
             "valid_logins": {
                 "admin": "admin123",
-                "root": "toor"
+                "root": "toor",
+                "testuser": "passtest"
             },
             "env": {
                 "BROWSER": "firefox",

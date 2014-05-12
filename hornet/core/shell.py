@@ -44,7 +44,7 @@ class Shell(TelnetHandler):
         TelnetHandler.__init__(self, request, client_address, server)
 
     def set_host(self, host, default=False):
-        self.login_stack.append(host)
+
         self.current_host = host
         if default:
             self.current_host.login(self.username)
@@ -57,6 +57,7 @@ class Shell(TelnetHandler):
             return
 
         default_host = self.vhosts[self.config.default_hostname]
+        self.login_stack.append(default_host)
         self.set_host(default_host, default=True)
         self.session_start()
         while self.RUNSHELL:
@@ -105,13 +106,16 @@ class Shell(TelnetHandler):
         new_host = self.vhosts[hostname]
         password = self.readline(echo=False, prompt=self.PROMPT_PASS, use_history=False)
         if new_host.authenticate(username, password):
+            self.login_stack.append(new_host)
             new_host.login(username)
             self.set_host(new_host)
+            self.writeline(new_host.welcome)
 
     def run_logout(self, _):  # Don't care about the params
-        self.login_stack = self.login_stack[:-1]
-        if len(self.login_stack) == 0:
+        if len(self.login_stack) == 1:
             self.RUNSHELL = False
+            self.login_stack = []
             return
+        del self.login_stack[-1]
         prev_host = self.login_stack[-1]
         self.set_host(prev_host)
