@@ -16,6 +16,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import argparse
 
 import logging
 import traceback
@@ -46,7 +47,7 @@ class Shell(TelnetHandler):
         self.login_stack.append(host)
         self.current_host = host
         if default:
-            self.current_host.login(self.username, self)
+            self.current_host.login(self.username)
         self.PROMPT = self.current_host.prompt
         self.WELCOME = self.current_host.welcome
 
@@ -66,8 +67,12 @@ class Shell(TelnetHandler):
                 cmd = self.input.cmd
                 params = self.input.params
                 try:
-                    command = getattr(self.current_host, 'run_' + cmd)
-                    command(params, self)
+                    if cmd in ['ssh', 'logout']:
+                        command = getattr(self, 'run_' + cmd)
+                        command(params)
+                    else:
+                        command = getattr(self.current_host, 'run_' + cmd)
+                        command(params, self)
                 except AttributeError:
                     # User entered something we have not implemented.
                     self.writeerror("{}: command not found".format(cmd))
@@ -75,3 +80,38 @@ class Shell(TelnetHandler):
                     logger.error(traceback.print_exc())
                     self.writeerror("{}: command not found".format(cmd))
         self.logging.debug("Exiting handler")
+
+    def run_ssh(self, params):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-p', dest='port', default=22, type=int)
+        parser.add_argument('-l', dest='username')
+        parser.add_argument('host_string')
+        args = parser.parse_args(params)
+        username = args.username
+        if username is None:
+            try:
+                username, _ = args.host_string.split('@')
+            except ValueError:
+                username = self.current_host.current_user
+        if '@' in args.host_string:
+            _, hostname = args.host_string.split('@')
+        else:
+            hostname = args.host_string
+        if not hostname in self.vhosts:
+            self.writeline('ssh: Could not resolve hostname {}: Name or service not known'.format(hostname))
+            return
+
+        # Hostname is valid. Now get the password.
+        new_host = self.vhosts[hostname]
+        password = self.readline(echo=False, prompt=self.PROMPT_PASS, use_history=False)
+        if new_host.authenticate(username, password):
+            new_host.login(username)
+            self.set_host(new_host)
+
+    def run_logout(self, _):  # Don't care about the params
+        self.login_stack = self.login_stack[:-1]
+        if len(self.login_stack) == 0:
+            self.RUNSHELL = False
+            return
+        prev_host = self.login_stack[-1]
+        self.set_host(prev_host)
