@@ -21,6 +21,7 @@ import argparse
 import curses
 
 import logging
+import socket
 import traceback
 
 from telnetsrv.green import TelnetHandler
@@ -63,25 +64,28 @@ class Shell(TelnetHandler):
         self.set_host(default_host, default=True)
         self.session_start()
         while self.RUNSHELL:
-            raw_input_ = self.readline(prompt=self.PROMPT).strip()
-            self.input = self.input_reader(self, raw_input_)
-            self.raw_input = self.input.raw
-            if self.input.cmd:
-                cmd = self.input.cmd
-                params = self.input.params
-                try:
-                    if cmd in ['ssh', 'logout']:
-                        command = getattr(self, 'run_' + cmd)
-                        command(params)
-                    else:
-                        command = getattr(self.current_host, 'run_' + cmd)
-                        command(params, self)
-                except AttributeError:
-                    # User entered something we have not implemented.
-                    self.writeerror("{}: command not found".format(cmd))
-                except:
-                    logger.error(traceback.print_exc())
-                    self.writeerror("{}: command not found".format(cmd))
+            try:
+                raw_input_ = self.readline(prompt=self.PROMPT).strip()
+                self.input = self.input_reader(self, raw_input_)
+                self.raw_input = self.input.raw
+                if self.input.cmd:
+                    cmd = self.input.cmd
+                    params = self.input.params
+                    try:
+                        if cmd in ['ssh', 'logout']:
+                            command = getattr(self, 'run_' + cmd)
+                            command(params)
+                        else:
+                            command = getattr(self.current_host, 'run_' + cmd)
+                            command(params, self)
+                    except AttributeError:
+                        # User entered something we have not implemented.
+                        self.writeerror("{}: command not found".format(cmd))
+                    except:
+                        logger.error(traceback.print_exc())
+                        self.writeerror("{}: command not found".format(cmd))
+            except socket.error:
+                break
         self.logging.debug("Exiting handler")
 
     def run_ssh(self, params):
