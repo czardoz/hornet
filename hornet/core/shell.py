@@ -127,7 +127,7 @@ class Shell(TelnetHandler):
         self.set_host(prev_host)
 
     def setterm(self, term):
-        "Set the curses structures for this terminal"
+        """ Set the curses structures for this terminal """
         logger.debug("Setting termtype to %s" % (term, ))
         try:
             curses.setupterm(term) # This will raise if the termtype is not supported
