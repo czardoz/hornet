@@ -51,6 +51,7 @@ class Shell(TelnetHandler):
         self.current_host = host
         if default:
             self.current_host.login(self.username)
+            self.writeline(self.current_host.welcome)
         self.PROMPT = self.current_host.prompt
         self.WELCOME = self.current_host.welcome
 
@@ -82,7 +83,7 @@ class Shell(TelnetHandler):
                         # User entered something we have not implemented.
                         self.writeerror("{}: command not found".format(cmd))
                     except:
-                        logger.error(traceback.print_exc())
+                        logger.exception('Unknown exception has occured')
                         self.writeerror("{}: command not found".format(cmd))
             except socket.error:
                 break

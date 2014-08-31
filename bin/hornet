@@ -35,7 +35,7 @@ __version__ = '.'.join(map(str, __version_tuple__))
 class LogFilter(logging.Filter):
 
     def filter(self, record):
-        if record.name.startswith('paramiko'):
+        if record.name.startswith('paramiko') or record.name.startswith('telnetsrv'):
             return False
         else:
             return True
