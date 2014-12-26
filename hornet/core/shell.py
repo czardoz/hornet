@@ -105,7 +105,7 @@ class Shell(TelnetHandler):
             _, hostname = args.host_string.split('@')
         else:
             hostname = args.host_string
-        if not hostname in self.vhosts:
+        if hostname not in self.vhosts:
             self.writeline('ssh: Could not resolve hostname {}: Name or service not known'.format(hostname))
             return
 
@@ -131,7 +131,7 @@ class Shell(TelnetHandler):
         """ Set the curses structures for this terminal """
         logger.debug("Setting termtype to %s" % (term, ))
         try:
-            curses.setupterm(term) # This will raise if the termtype is not supported
+            curses.setupterm(term)  # This will raise if the termtype is not supported
         except TypeError:
             file_ = open('/dev/null', 'w')
             dummyfd = file_.fileno()

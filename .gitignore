@@ -4,6 +4,7 @@
 # Packages
 *.egg
 *.egg-info
+.eggs/
 dist
 build
 eggs
@@ -13,4 +14,5 @@ develop-eggs
 .installed.cfg
 
 # Installer logs
-pip-log.txt/.coverage
+pip-log.txt
+.coverage

@@ -286,7 +286,7 @@ class HornetTests(unittest.TestCase):
         self.assertTrue('Welcome to test01 server' in output)
         self.assertTrue(output.endswith('$ '))
 
-        # Now send the ssh command
+        # Now send the logout command
         channel.send('logout\r\n')
         while not channel.recv_ready():
             gevent.sleep(0)  # :-(
@@ -374,7 +374,7 @@ class HornetTests(unittest.TestCase):
         honeypot.stop()
 
     def test_echo_no_params(self):
-        """ Tests if echo command works when parameters are specified """
+        """ Tests if echo command works when no parameters are specified """
 
         honeypot = Hornet(self.working_dir)
         honeypot.start()
