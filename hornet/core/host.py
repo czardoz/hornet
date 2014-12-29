@@ -17,16 +17,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
+import json
 import logging
 import os
 
 from fs.osfs import OSFS
 from hornet.common.helpers import get_random_item
+from hornet.core.commands.ls_command import LsCommand
 
 logger = logging.getLogger(__name__)
 
 
+class Parser(argparse.ArgumentParser):
+
+    def error(self, message):
+        logger.info('User supplied wrong arguments: {}'.format(message))
+        raise ParseError()
+
+
+class ParseError(Exception):
+    pass
+
+
 class VirtualHost(object):
+
+    """ Represents a single host. This class implements the commands
+        that are host-specific, like pwd, ls, etc.
+    """
+
     def __init__(self, params, network, fs_dir):
         self.hostname = params['hostname']
         self.ip_address = params['ip_address']
@@ -54,7 +73,7 @@ class VirtualHost(object):
         else:
             self.default = False
         self.filesystem = OSFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
-        self.working_path = '~'
+        self.working_path = '/'
 
     def authenticate(self, username, password):
         if self.valid_logins.get(username, None) == password:
@@ -92,6 +111,104 @@ class VirtualHost(object):
             shell.writeline(' '.join(params))
         else:
             shell.writeline(' '.join(params))
+
+    def run_pwd(self, params, shell):
+        if params:
+            shell.writeline('pwd: too many arguments')
+        else:
+            shell.writeline('{}'.format(self.working_path))
+
+    def run_ls(self, params, shell):
+        paths = []
+        other_params = []
+        for p in params:
+            if p.startswith('-'):
+                other_params.append(p)
+            else:
+                paths.append(p)
+
+        if not paths:  # List contents of working dir by default
+            paths.append(self.working_path)
+
+        parser = Parser(add_help=False)
+        parser.add_argument('-a', '--all', action='store_true', default=False)
+        parser.add_argument('-A', '--almost-all', action='store_true', default=False)
+        parser.add_argument('-d', '--directory', action='store_true', default=False)
+        parser.add_argument('-l', action='store_true', default=False)
+
+        # We ignore these (for now), but still parse them ;-)
+        parser.add_argument('-h', '--human-readable', action='store_true', default=False)
+        parser.add_argument('-b', '--escape', action='store_true', default=False)
+        parser.add_argument('--block-size')
+        parser.add_argument('-B', '--ignore-backups', action='store_true', default=False)
+        parser.add_argument('-c', action='store_true', default=False)
+        parser.add_argument('-C', action='store_true', default=False)
+        parser.add_argument('--color')
+        parser.add_argument('-D', '--dired', action='store_true', default=False)
+        parser.add_argument('-f', action='store_true', default=False)
+        parser.add_argument('-F', '--classify', action='store_true', default=False)
+        parser.add_argument('--file-type', action='store_true', default=False)
+        parser.add_argument('--format')
+        parser.add_argument('--full-time', action='store_true', default=False)
+        parser.add_argument('-g', action='store_true', default=False)
+        parser.add_argument('--group-directories-first', action='store_true', default=False)
+        parser.add_argument('-G', '--no-group', action='store_true', default=False)
+        parser.add_argument('-H', '--dereference-command-line', action='store_true', default=False)
+        parser.add_argument('--dereference-command-line-symlink-to-dir', action='store_true', default=False)
+        parser.add_argument('--hide')
+        parser.add_argument('--indicator-style')
+        parser.add_argument('-i', '--inode', action='store_true', default=False)
+        parser.add_argument('-I', '--ignore')
+        parser.add_argument('-k', '--kibibytes', action='store_true', default=False)
+        parser.add_argument('-L', '--deference', action='store_true', default=False)
+        parser.add_argument('-m', action='store_true', default=False)
+        parser.add_argument('-n', '--numeric-uid-gid', action='store_true', default=False)
+        parser.add_argument('-N', '--literal', action='store_true', default=False)
+        parser.add_argument('-o', action='store_true', default=False)
+        parser.add_argument('-p', action='store_true', default=False)
+        parser.add_argument('-q', '--hide-control-chars', action='store_true', default=False)
+        parser.add_argument('--show-control-chars', action='store_true', default=False)
+        parser.add_argument('-Q', '--quote-name', action='store_true', default=False)
+        parser.add_argument('--quoting-style')
+        parser.add_argument('-r', '--reverse', action='store_true', default=False)
+        parser.add_argument('-R', '--recursive', action='store_true', default=False)
+        parser.add_argument('-s', '--size', action='store_true', default=False)
+        parser.add_argument('-S', action='store_true', default=False)
+        parser.add_argument('--sort')
+        parser.add_argument('--time')
+        parser.add_argument('--time-style')
+        parser.add_argument('-t', action='store_true', default=False)
+        parser.add_argument('-T', '--tabsize', default=False)
+        parser.add_argument('-u', action='store_true', default=False)
+        parser.add_argument('-U', action='store_true', default=False)
+        parser.add_argument('-v', action='store_true', default=False)
+        parser.add_argument('-w', '--width')
+        parser.add_argument('-x', action='store_true', default=False)
+        parser.add_argument('-X', action='store_true', default=False)
+        parser.add_argument('-1', dest='one_per_line', action='store_true', default=False)
+        parser.add_argument('--help', action='store_true', default=False)
+        parser.add_argument('--version', action='store_true', default=False)
+
+        try:
+            args = parser.parse_args(other_params)
+        except ParseError:
+            shell.writeline('ls: invalid options: \"{}\"'.format(' '.join(params)))
+            shell.writeline('Try \'ls --help\' for more information.')
+            return
+
+        if args.help:
+            # TODO: send the ls help string.
+            logger.debug('Sending help string')
+            return
+
+        if args.version:
+            # TODO: send the ls version string.
+            logger.debug('Sending version string')
+            return
+
+        ls_cmd = LsCommand(args, paths, self.filesystem)
+        output = ls_cmd.process()
+        shell.writeline(output)
 
     def _set_ip_from_previous_run(self, fs_dir, valid_ips):  # pragma: no cover
         for dir_name in os.listdir(fs_dir):

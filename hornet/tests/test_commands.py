@@ -115,7 +115,7 @@ class HornetTests(unittest.TestCase):
         honeypot.stop()
 
     def test_ssh_with_username(self):
-        """ Tests if ssh command works when no username is provided in host string
+        """ Tests if ssh command works when username is provided in host string
             eg: $ ssh mango@test01
         """
 
@@ -160,7 +160,7 @@ class HornetTests(unittest.TestCase):
         honeypot.stop()
 
     def test_ssh_with_username_param(self):
-        """ Tests if ssh command works when no username is provided in host string
+        """ Tests if ssh command works when username is provided as a parameter
             eg: $ ssh test01 -l mango
         """
 
@@ -507,5 +507,70 @@ class HornetTests(unittest.TestCase):
         self.assertTrue('var' in command_output)
         self.assertTrue('etc' in command_output)
         self.assertTrue('opt' in command_output)
+        self.assertTrue(next_prompt.endswith('$ '))
+        honeypot.stop()
+
+    def test_pwd(self):
+        """ Tests if pwd command works """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the pwd command
+        pwd_command = 'pwd /something/ any kind of param 123'
+        channel.send(pwd_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        self.assertEquals(command, pwd_command)
+        self.assertEquals(command_output, 'pwd: too many arguments')
+        self.assertTrue(next_prompt.endswith('$ '))
+
+        pwd_command = 'pwd'
+        channel.send(pwd_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        self.assertEquals(command, pwd_command)
+        self.assertEquals(command_output, '/')
         self.assertTrue(next_prompt.endswith('$ '))
         honeypot.stop()

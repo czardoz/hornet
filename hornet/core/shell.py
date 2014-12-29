@@ -29,6 +29,12 @@ from telnetsrv.green import TelnetHandler
 logger = logging.getLogger(__name__)
 
 
+class NoHelpArgumentParser(argparse.ArgumentParser):
+
+    def error(self, message):
+        logger.error('Error occured while parsing the arguments: ' + message)
+
+
 class Shell(TelnetHandler):
     """
         This class implements the shell functionality. It handles the various VirtualHosts and
@@ -44,6 +50,8 @@ class Shell(TelnetHandler):
         self.logging = logger
         self.current_host = None
         self.config = config
+        self.raw_input = None
+        self.input = None
         TelnetHandler.__init__(self, request, client_address, server)
 
     def set_host(self, host, default=False):
@@ -73,14 +81,18 @@ class Shell(TelnetHandler):
                     cmd = self.input.cmd
                     params = self.input.params
                     try:
-                        if cmd in ['ssh', 'logout']:
+                        if cmd == 'QUIT':  # Handle Ctrl+D
+                            cmd = 'logout'
+                        if cmd in ['ssh', 'logout']:  # These are handled by the Shell itself.
                             command = getattr(self, 'run_' + cmd)
                             command(params)
-                        else:
+                        else:  # The rest of the commands are handled by the VirtualHosts
                             command = getattr(self.current_host, 'run_' + cmd)
                             command(params, self)
                     except AttributeError:
                         # User entered something we have not implemented.
+                        logger.exception('AttributeError occured while running '
+                                         'command "{}" with params "{}"'.format(cmd, params))
                         self.writeerror("{}: command not found".format(cmd))
                     except:
                         logger.exception('Unknown exception has occured')
@@ -140,9 +152,9 @@ class Shell(TelnetHandler):
         self.TERM = term
         self.ESCSEQ = {}
         for k in self.KEYS.keys():
-            str = curses.tigetstr(curses.has_key._capability_names[k])
-            if str:
-                self.ESCSEQ[str] = k
+            str_ = curses.tigetstr(curses.has_key._capability_names[k])
+            if str_:
+                self.ESCSEQ[str_] = k
         # Create a copy to prevent altering the class
         self.CODES = self.CODES.copy()
         self.CODES['DEOL'] = curses.tigetstr('el')
