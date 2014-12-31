@@ -52,7 +52,8 @@ class LsCommand(object):
             current_path_info = self.output[path]
             if self.args.l:
                 if not self.args.directory:
-                    result += 'total {}\n'.format(current_path_info.total)
+                    if current_path_info.is_dir:
+                        result += 'total {}\n'.format(current_path_info.total)
                 result += '\n'.join(current_path_info.path_output)
             else:
                 result += ' '.join(current_path_info.path_output)
@@ -68,8 +69,11 @@ class LsCommand(object):
                     result += '\n'.join(current_path_info.path_output)
                 else:
                     result += ' '.join(current_path_info.path_output)
-                result += '\n\n'
-        return result.strip()
+                if not self.args.directory:
+                    result += '\n\n'
+                else:
+                    result += '\n'
+        return result.strip()  # remove the last newline, because shell.writeline() will introduce it later.
 
     def _stat_path(self, path):
         logger.debug('Statting path {}'.format(path))
@@ -98,7 +102,7 @@ class LsCommand(object):
         path_output = []
         is_directory = False
         if self.args.directory:
-            if self.filesystem.isvalidpath(path):
+            if self.filesystem.isfile(path) or self.filesystem.isdir(path):
                 exists = True
                 stat = self._stat_path(path)
                 path_output.append(stat['path_string'])
