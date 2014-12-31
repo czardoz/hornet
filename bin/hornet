@@ -41,18 +41,19 @@ class LogFilter(logging.Filter):
             return True
 
 
-def setup_logging(verbose=False):
+def setup_logging(args):
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
     console_handler = logging.StreamHandler()
-    if verbose:
+    if args.verbose or args.extremely_verbose:
         log_level = logging.DEBUG
     else:
         log_level = logging.WARNING
 
     formatter = logging.Formatter('%(asctime)s (%(name)s) %(message)s')
     console_handler.setFormatter(formatter)
-    console_handler.addFilter(LogFilter())
+    if not args.extremely_verbose:
+        console_handler.addFilter(LogFilter())
     console_handler.setLevel(log_level)
     root_logger.addHandler(console_handler)
 
@@ -62,8 +63,10 @@ if __name__ == '__main__':
     # Command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help='More detailed logging.')
+    parser.add_argument('-V', '--extremely-verbose', action='store_true', default=False,
+                        help='Logs from 3rd party libs are enabled as well.')
     args = parser.parse_args()
-    setup_logging(args.verbose)
+    setup_logging(args)
 
     logging.info('Starting Hornet, version: {}'.format(__version__))
     working_directory = os.getcwd()
