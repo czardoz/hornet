@@ -168,7 +168,8 @@ class HornetTests(unittest.TestCase):
         next_prompt = lines[-1]
 
         self.assertEquals(command, ls_command)
-        self.assertTrue("etc:\r\npasswd sysctl.conf" in command_output)
+        self.assertTrue('etc:\r\npasswd sysctl.conf' in command_output or
+                        'etc:\r\nsysctl.conf passwd' in command_output)  # Order is not important
         self.assertTrue("var:" in command_output)
         self.assertTrue(next_prompt.endswith('$ '))
 
@@ -221,7 +222,7 @@ class HornetTests(unittest.TestCase):
 
         self.assertTrue(dir_outputs[0].startswith('etc:'))
         self.assertTrue('total 0' in dir_outputs[0])
-        self.assertTrue('passwd\r\n' in dir_outputs[0])
+        self.assertTrue('passwd' in dir_outputs[0])
         self.assertTrue('sysctl.conf' in dir_outputs[0])  # No carriage return here, because it was split before
         self.assertTrue(len(dir_outputs[0].split('\r\n')) == 4)  # make sure 4 lines are generated
 
