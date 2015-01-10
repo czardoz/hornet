@@ -168,9 +168,14 @@ class HornetTests(unittest.TestCase):
         next_prompt = lines[-1]
 
         self.assertEquals(command, ls_command)
-        self.assertTrue('etc:\r\npasswd sysctl.conf' in command_output or
-                        'etc:\r\nsysctl.conf passwd' in command_output)  # Order is not important
-        self.assertTrue("var:" in command_output)
+        dir_outputs = sorted(command_output.split('\r\n\r\n'))
+
+        self.assertTrue('etc:\r\n' in dir_outputs[0])
+        self.assertTrue('passwd' in dir_outputs[0])
+        self.assertTrue('init.d' in dir_outputs[0])
+        self.assertTrue('sysctl.conf' in dir_outputs[0])
+
+        self.assertTrue("var:" in dir_outputs[1])
         self.assertTrue(next_prompt.endswith('$ '))
 
         honeypot.stop()
