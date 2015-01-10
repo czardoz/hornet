@@ -18,7 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import argparse
-import json
 import logging
 import os
 
@@ -206,7 +205,7 @@ class VirtualHost(object):
             logger.debug('Sending version string')
             return
 
-        ls_cmd = LsCommand(args, paths, self.filesystem)
+        ls_cmd = LsCommand(args, paths, self.filesystem, self.working_path)
         output = ls_cmd.process()
         shell.writeline(output)
 

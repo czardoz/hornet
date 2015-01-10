@@ -22,6 +22,7 @@ import os
 
 from tarfile import filemode  # Coverts file/directory mode into the ls format (e.g drwxr-xr-x)
 import time
+from fs.errors import BackReferenceError
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +38,21 @@ class _PathInfo(object):
 
 
 class LsCommand(object):
-    def __init__(self, args, paths, filesystem):
+    def __init__(self, args, paths, filesystem, working_path):
         self.args = args
         self.paths = sorted(paths)
         self.filesystem = filesystem
+        self.working_path = working_path
         self.output = {}
 
     def process(self):
-        for p in self.paths:
-            self._process_path(p)
+        for count, p in enumerate(self.paths):
+            try:
+                self._process_path(p)
+            except BackReferenceError as e:
+                logger.warn('Access to the external file system was attempted.')
+                new_path = os.path.join(self.working_path, p.strip('../'))
+                self._process_path(new_path, key_path=p)
         result = ''
         if len(self.paths) == 1:
             path = self.paths[0]
@@ -98,7 +105,7 @@ class LsCommand(object):
             path_string = name
         return {'path_string': path_string, 'total': total}
 
-    def _process_path(self, path):
+    def _process_path(self, path, key_path=None):
         path_output = []
         is_directory = False
         if self.args.directory:
@@ -113,7 +120,8 @@ class LsCommand(object):
                 exists = False
                 total = 0
                 path_output.append('ls: cannot access {}: No such file or directory'.format(path))
-            self.output[path] = _PathInfo(path, total, path_output, exists, is_directory)
+            path_info = _PathInfo(path, total, path_output, exists, is_directory)
+            self._add_path_output(path_info, key_path)
         else:
             if self.filesystem.isdir(path):
                 # Process all files one by one, adding to the output list
@@ -134,4 +142,11 @@ class LsCommand(object):
                 exists = False
                 total = 0
                 path_output.append('ls: cannot access {}: No such file or directory'.format(path))
-        self.output[path] = _PathInfo(path, total, path_output, exists, is_directory)
+        path_info = _PathInfo(path, total, path_output, exists, is_directory)
+        self._add_path_output(path_info, key_path)
+
+    def _add_path_output(self, path_info, key_path):
+        if key_path is None:
+            self.output[path_info.path] = path_info
+        else:
+            self.output[key_path] = path_info

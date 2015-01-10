@@ -70,13 +70,13 @@ class HornetTests(unittest.TestCase):
         self.assertTrue('etc' in command_output)
         self.assertTrue('var' in command_output)
         self.assertTrue('bin' in command_output)
-        self.assertTrue('crapfile.txt' in command_output)
+        self.assertTrue('initrd.img' in command_output)
         self.assertTrue(next_prompt.endswith('$ '))
 
         honeypot.stop()
 
     def test_ls_long(self):
-        """ Tests basic 'ls -l' """
+        """ Test basic 'ls -l' """
 
         honeypot = Hornet(self.working_dir)
         honeypot.start()
@@ -119,7 +119,7 @@ class HornetTests(unittest.TestCase):
 
         self.assertEquals(command, ls_command)
         actual_list = command_output.split('\r\n')[1:]  # Ignore the first "total" entry
-        expected_list = ['crapfile.txt', 'var', 'etc', 'bin']
+        expected_list = ['initrd.img', 'var', 'etc', 'bin']
         self.verify_long_list(actual_list, expected_list)
         self.assertTrue(next_prompt.endswith('$ '))
 
@@ -221,10 +221,11 @@ class HornetTests(unittest.TestCase):
         dir_outputs = sorted(command_output.split('\r\n\r\n'))
 
         self.assertTrue(dir_outputs[0].startswith('etc:'))
-        self.assertTrue('total 0' in dir_outputs[0])
+        self.assertTrue('total 4' in dir_outputs[0])
         self.assertTrue('passwd' in dir_outputs[0])
         self.assertTrue('sysctl.conf' in dir_outputs[0])  # No carriage return here, because it was split before
-        self.assertTrue(len(dir_outputs[0].split('\r\n')) == 4)  # make sure 4 lines are generated
+        self.assertTrue('init.d' in dir_outputs[0])  # No carriage return here, because it was split before
+        self.assertTrue(len(dir_outputs[0].split('\r\n')) == 5)  # make sure 4 lines are generated
 
         self.assertTrue(dir_outputs[1].startswith('var:'))
         self.assertTrue('total 0' in dir_outputs[1])
@@ -504,7 +505,7 @@ class HornetTests(unittest.TestCase):
         self.assertTrue(prompt.endswith('$ '))
 
         # Now send the ls command
-        ls_command = 'ls -ld var bin etc/passwd crapfile.txt'
+        ls_command = 'ls -ld var bin etc/passwd initrd.img'
         channel.send(ls_command + '\r\n')
 
         while not channel.recv_ready():
@@ -521,7 +522,7 @@ class HornetTests(unittest.TestCase):
 
         self.assertEquals(command, ls_command)
         actual_list = command_output.split('\r\n')
-        expected_list = ['crapfile.txt', 'var', 'passwd', 'bin']
+        expected_list = ['initrd.img', 'var', 'passwd', 'bin']
         self.verify_long_list(actual_list, expected_list)
         self.assertTrue('total' not in command_output)
         self.assertTrue(next_prompt.endswith('$ '))
@@ -538,11 +539,175 @@ class HornetTests(unittest.TestCase):
                     break
             self.assertTrue(found)
 
+    def test_ls_with_backref_directory_argument(self):
+        """ Test basic 'ls etc/..' """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+        self.create_filesystem(honeypot)
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the ls command
+        ls_command = 'ls etc/..'
+        channel.send(ls_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        self.assertEquals(command, ls_command)
+        self.assertTrue('etc' in command_output)
+        self.assertTrue('var' in command_output)
+        self.assertTrue('bin' in command_output)
+        self.assertTrue('initrd.img' in command_output)
+        self.assertTrue(next_prompt.endswith('$ '))
+
+        honeypot.stop()
+
+    def test_ls_long_backref(self):
+        """ Test basic 'ls -l .. var' with multiple directory arguments """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+        self.create_filesystem(honeypot)
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the ls command
+        ls_command = 'ls -l .. var'
+        channel.send(ls_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        self.assertEquals(command, ls_command)
+        dir_outputs = sorted(command_output.split('\r\n\r\n'))
+
+        self.assertTrue(dir_outputs[0].startswith('..:'))
+        self.assertTrue('total 12' in dir_outputs[0])
+        self.assertTrue('var' in dir_outputs[0])
+        self.assertTrue('bin' in dir_outputs[0])
+        self.assertTrue('initrd.img' in dir_outputs[0])
+        self.assertTrue('etc' in dir_outputs[0])
+        self.assertEquals(len(dir_outputs[0].split('\r\n')), 6)
+
+        self.assertTrue(dir_outputs[1].startswith('var:'))
+        self.assertTrue('total 0' in dir_outputs[1])
+        self.assertEquals(len(dir_outputs[1].split('\r\n')), 2)
+
+        self.assertTrue(next_prompt.endswith('$ '))
+
+        honeypot.stop()
+
+    def test_ls_backref_overflow(self):
+        """ Test ls with backref overflow 'ls ../../..' """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+        self.create_filesystem(honeypot)
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the ls command
+        ls_command = 'ls'
+        channel.send(ls_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        self.assertEquals(command, ls_command)
+        self.assertTrue('etc' in command_output)
+        self.assertTrue('var' in command_output)
+        self.assertTrue('bin' in command_output)
+        self.assertTrue('initrd.img' in command_output)
+        self.assertTrue(next_prompt.endswith('$ '))
+
+        honeypot.stop()
+
     def create_filesystem(self, honeypot):
         default_host = honeypot.vhosts[honeypot.config.default_hostname]
         default_host.filesystem.makedir('/etc')
         default_host.filesystem.makedir('/var')
         default_host.filesystem.makedir('/bin')
+        default_host.filesystem.makedir('/etc/init.d')
         default_host.filesystem.createfile('/etc/passwd')
         default_host.filesystem.createfile('/etc/sysctl.conf')
-        default_host.filesystem.createfile('/crapfile.txt')
+        default_host.filesystem.createfile('/initrd.img')
