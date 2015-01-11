@@ -1,28 +1,35 @@
+# !/usr/bin/env python
+#
+# Hornet - SSH Honeypot
+#
+# Copyright (C) 2015 Aniket Panse <aniketpanse@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import gevent.monkey
 gevent.monkey.patch_all()
 
 import paramiko
 import re
-import os
-import shutil
-import unittest
-import tempfile
 
-import hornet
 from hornet.main import Hornet
+from hornet.tests.commands.base import BaseTestClass
 
 LS_L_REGEX = r"[-d][rwx-]{9}(.*)"
 
 
-class HornetTests(unittest.TestCase):
-
-    def setUp(self):
-        self.working_dir = tempfile.mkdtemp()
-        test_config = os.path.join(os.path.dirname(hornet.__file__), 'data', 'default_config.json')
-        shutil.copyfile(test_config, os.path.join(self.working_dir, 'config.json'))
-
-    def tearDown(self):
-        shutil.rmtree(self.working_dir)
+class HornetTests(BaseTestClass):
 
     def test_basic_ls(self):
         """ Test basic 'ls' """
@@ -534,16 +541,6 @@ class HornetTests(unittest.TestCase):
 
         honeypot.stop()
 
-    def verify_long_list(self, actual_list, expected_list):
-        for exp in expected_list:
-            found = False
-            regex = LS_L_REGEX + r'{}'.format(exp)
-            for act in actual_list:
-                if re.match(regex, act):
-                    found = True
-                    break
-            self.assertTrue(found)
-
     def test_ls_with_backref_directory_argument(self):
         """ Test basic 'ls etc/..' """
 
@@ -707,12 +704,12 @@ class HornetTests(unittest.TestCase):
 
         honeypot.stop()
 
-    def create_filesystem(self, honeypot):
-        default_host = honeypot.vhosts[honeypot.config.default_hostname]
-        default_host.filesystem.makedir('/etc')
-        default_host.filesystem.makedir('/var')
-        default_host.filesystem.makedir('/bin')
-        default_host.filesystem.makedir('/etc/init.d')
-        default_host.filesystem.createfile('/etc/passwd')
-        default_host.filesystem.createfile('/etc/sysctl.conf')
-        default_host.filesystem.createfile('/initrd.img')
+    def verify_long_list(self, actual_list, expected_list):
+        for exp in expected_list:
+            found = False
+            regex = LS_L_REGEX + r'{}'.format(exp)
+            for act in actual_list:
+                if re.match(regex, act):
+                    found = True
+                    break
+            self.assertTrue(found)
