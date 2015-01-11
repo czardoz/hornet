@@ -233,7 +233,7 @@ class HornetTests(BaseTestClass):
         dir_outputs = sorted(command_output.split('\r\n\r\n'))
 
         self.assertTrue(dir_outputs[0].startswith('etc:'))
-        self.assertTrue('total 4' in dir_outputs[0])
+        self.assertTrue('total ' in dir_outputs[0])
         self.assertTrue('passwd' in dir_outputs[0])
         self.assertTrue('sysctl.conf' in dir_outputs[0])  # No carriage return here, because it was split before
         self.assertTrue('init.d' in dir_outputs[0])  # No carriage return here, because it was split before
@@ -638,7 +638,7 @@ class HornetTests(BaseTestClass):
         dir_outputs = sorted(command_output.split('\r\n\r\n'))
 
         self.assertTrue(dir_outputs[0].startswith('..:'))
-        self.assertTrue('total 12' in dir_outputs[0])
+        self.assertTrue('total ' in dir_outputs[0])
         self.assertTrue('var' in dir_outputs[0])
         self.assertTrue('bin' in dir_outputs[0])
         self.assertTrue('initrd.img' in dir_outputs[0])
