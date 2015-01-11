@@ -20,6 +20,8 @@
 import argparse
 import logging
 import os
+import fs
+from fs.errors import BackReferenceError
 
 from fs.osfs import OSFS
 from hornet.common.helpers import get_random_item
@@ -208,6 +210,24 @@ class VirtualHost(object):
         ls_cmd = LsCommand(args, paths, self.filesystem, self.working_path)
         output = ls_cmd.process()
         shell.writeline(output)
+
+    def run_cd(self, params, shell):
+        if len(params) == 0:
+            params = ['/']
+        cd_path = os.path.join(self.working_path, params[0])
+        new_path_exists = False
+        try:
+            new_path_exists = self.filesystem.exists(cd_path)
+        except BackReferenceError as e:
+            logger.warn('Access to the external file system was attempted.')
+            cd_path = '/'
+            new_path_exists = True
+        finally:
+            if not new_path_exists:
+                shell.writeline('cd: {}: No such file or directory'.format(params[0]))
+            else:
+                self.working_path = os.path.normpath(cd_path)
+                logger.debug('Working directory for host {} changed to {}'.format(self.hostname, self.working_path))
 
     def _set_ip_from_previous_run(self, fs_dir, valid_ips):  # pragma: no cover
         for dir_name in os.listdir(fs_dir):

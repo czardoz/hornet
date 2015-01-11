@@ -97,6 +97,8 @@ class Shell(TelnetHandler):
                     except:
                         logger.exception('Unknown exception has occured')
                         self.writeerror("{}: command not found".format(cmd))
+                    finally:
+                        self.PROMPT = self.current_host.prompt
             except socket.error:
                 break
         self.logging.debug("Exiting handler")
