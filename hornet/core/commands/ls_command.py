@@ -83,7 +83,6 @@ class LsCommand(object):
         return result.strip()  # remove the last newline, because shell.writeline() will introduce it later.
 
     def _stat_path(self, path):
-        logger.debug('Statting path {}'.format(path))
         stat_result = os.stat(self.filesystem.getsyspath(path))
         try:
             last_modified = time.strftime("%b %d %H:%M", time.localtime(stat_result.st_mtime))
