@@ -2,7 +2,7 @@
 # bug (http://bugs.python.org/issue15881#msg170215)
 
 import multiprocessing
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='hornet',
@@ -12,7 +12,7 @@ setup(
     author='Aniket Panse',
     author_email='aniketpanse@gmail.com',
     license='GPLv3',
-    packages=['hornet'],
+    packages=find_packages(exclude=['*.tests']),
     zip_safe=False,
     install_requires=open('requirements.txt').readlines(),
     test_suite='nose.collector',
