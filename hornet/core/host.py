@@ -21,8 +21,9 @@ import argparse
 import logging
 import os
 import fs
-from fs.errors import BackReferenceError
+import hornet
 
+from fs.errors import BackReferenceError
 from fs.osfs import OSFS
 from hornet.common.helpers import get_random_item
 from hornet.core.commands.ls_command import LsCommand
@@ -198,13 +199,23 @@ class VirtualHost(object):
             return
 
         if args.help:
-            # TODO: send the ls help string.
-            logger.debug('Sending help string')
+            help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                          'commands', 'ls', 'help')
+            logger.debug('Sending help string from file {}'.format(help_file_path))
+            with open(help_file_path) as help_file:
+                for line in help_file:
+                    line = line.strip()
+                    shell.writeline(line)
             return
 
         if args.version:
-            # TODO: send the ls version string.
-            logger.debug('Sending version string')
+            version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                             'commands', 'ls', 'version')
+            logger.debug('Sending version string from file {}'.format(version_file_path))
+            with open(version_file_path) as version_file:
+                for line in version_file:
+                    line = line.strip()
+                    shell.writeline(line)
             return
 
         ls_cmd = LsCommand(args, paths, self.filesystem, self.working_path)

@@ -22,6 +22,9 @@ gevent.monkey.patch_all()
 
 import paramiko
 import re
+import os
+
+import hornet
 
 from hornet.main import Hornet
 from hornet.tests.commands.base import BaseTestClass
@@ -80,6 +83,116 @@ class HornetTests(BaseTestClass):
         self.assertTrue('initrd.img' in command_output)
         self.assertTrue(next_prompt.endswith('$ '))
 
+        honeypot.stop()
+
+    def test_ls_version_string(self):
+        """ Test basic 'ls --version' """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+        self.create_filesystem(honeypot)
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the ls command
+        ls_command = 'ls --version'
+        channel.send(ls_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        expected_output = []
+        version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                         'commands', 'ls', 'version')
+        with open(version_file_path) as version_file:
+            for line in version_file:
+                line = line.strip()
+                expected_output.append(line)
+
+        self.assertEquals(command, ls_command)
+        self.assertEquals(command_output, '\r\n'.join(expected_output))
+        self.assertTrue(next_prompt.endswith('$ '))
+        honeypot.stop()
+
+    def test_ls_help_string(self):
+        """ Test basic 'ls --help' """
+
+        honeypot = Hornet(self.working_dir)
+        honeypot.start()
+        self.create_filesystem(honeypot)
+
+        while honeypot.server.server_port == 0:  # wait until the server is ready
+            gevent.sleep(0)
+        port = honeypot.server.server_port
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # If we log in properly, this should raise no errors
+        client.connect('127.0.0.1', port=port, username='testuser', password='testpassword')
+        channel = client.invoke_shell()
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        welcome = ''
+        while channel.recv_ready():
+            welcome += channel.recv(1)
+        lines = welcome.split('\r\n')
+        prompt = lines[-1]
+        self.assertTrue(prompt.endswith('$ '))
+
+        # Now send the ls command
+        ls_command = 'ls --help'
+        channel.send(ls_command + '\r\n')
+
+        while not channel.recv_ready():
+            gevent.sleep(0)  # :-(
+
+        output = ''
+        while not output.endswith('$ '):
+            output += channel.recv(1)
+
+        lines = output.split('\r\n')
+        command = lines[0]
+        command_output = '\r\n'.join(lines[1:-1])
+        next_prompt = lines[-1]
+
+        expected_output = []
+        help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                      'commands', 'ls', 'help')
+        with open(help_file_path) as help_file:
+            for line in help_file:
+                line = line.strip()
+                expected_output.append(line)
+
+        self.assertEquals(command, ls_command)
+        self.assertEquals(command_output, '\r\n'.join(expected_output))
+        self.assertTrue(next_prompt.endswith('$ '))
         honeypot.stop()
 
     def test_ls_long(self):
