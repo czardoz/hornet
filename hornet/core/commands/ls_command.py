@@ -48,7 +48,8 @@ class LsCommand(object):
     def process(self):
         for count, p in enumerate(self.paths):
             try:
-                self._process_path(p)
+                normalized_path = os.path.normpath(os.path.join(self.working_path, p))
+                self._process_path(normalized_path, key_path=p)
             except BackReferenceError as e:
                 logger.warn('Access to the external file system was attempted.')
                 new_path = os.path.join(self.working_path, p.strip('../'))
@@ -61,9 +62,16 @@ class LsCommand(object):
                 if not self.args.directory:
                     if current_path_info.is_dir:
                         result += 'total {}\n'.format(current_path_info.total)
+                        if self.args.all:
+                            result += self._get_hidden_dirs(current_path_info.path)
+
                 result += '\n'.join(current_path_info.path_output)
             else:
-                result += ' '.join(current_path_info.path_output)
+                if self.args.all:
+                    dirs = ['.', '..'] + current_path_info.path_output
+                else:
+                    dirs = current_path_info.path_output
+                result += ' '.join(dirs)
         else:
             for path in self.paths:
                 current_path_info = self.output[path]
@@ -73,9 +81,15 @@ class LsCommand(object):
                 if self.args.l:
                     if not self.args.directory and current_path_info.is_dir:
                         result += 'total {}\n'.format(current_path_info.total)
+                        if self.args.all:
+                            result += self._get_hidden_dirs(current_path_info.path)
                     result += '\n'.join(current_path_info.path_output)
                 else:
-                    result += ' '.join(current_path_info.path_output)
+                    if self.args.all:
+                        dirs = ['.', '..'] + current_path_info.path_output
+                    else:
+                        dirs = current_path_info.path_output
+                    result += ' '.join(dirs)
                 if not self.args.directory:
                     result += '\n\n'
                 else:
@@ -83,6 +97,10 @@ class LsCommand(object):
         return result.strip()  # remove the last newline, because shell.writeline() will introduce it later.
 
     def _stat_path(self, path):
+        hidden = False
+        base_name = path.split('/')[-1]
+        if base_name.startswith('.'):
+            hidden = True
         stat_result = os.stat(self.filesystem.getsyspath(path))
         try:
             last_modified = time.strftime("%b %d %H:%M", time.localtime(stat_result.st_mtime))
@@ -102,23 +120,29 @@ class LsCommand(object):
             )
         else:
             path_string = name
-        return {'path_string': path_string, 'total': total}
+
+        return {'path_string': path_string, 'total': total, 'hidden': hidden}
 
     def _process_path(self, path, key_path=None):
         path_output = []
         is_directory = False
+        logger.debug('Processing path: {}'.format(path))
         if self.args.directory:
             if self.filesystem.isfile(path) or self.filesystem.isdir(path):
                 exists = True
                 stat = self._stat_path(path)
-                path_output.append(stat['path_string'])
+                if stat['hidden']:
+                    if self.args.all:
+                        path_output.append(stat['path_string'])
+                else:
+                    path_output.append(stat['path_string'])
                 total = stat['total']
                 if self.filesystem.isdir(path):
                     is_directory = True
             else:
                 exists = False
                 total = 0
-                path_output.append('ls: cannot access {}: No such file or directory'.format(path))
+                path_output.append('ls: cannot access {}: No such file or directory'.format(path.lstrip('/')))
             path_info = _PathInfo(path, total, path_output, exists, is_directory)
             self._add_path_output(path_info, key_path)
         else:
@@ -127,20 +151,28 @@ class LsCommand(object):
                 exists = True
                 total = 0
                 is_directory = True
-                for file_ in self.filesystem.listdir(path):
+                for file_ in sorted(self.filesystem.listdir(path)):
                     file_path = os.path.join(path, file_)
                     stat = self._stat_path(file_path)
-                    path_output.append(stat['path_string'])
+                    if stat['hidden']:
+                        if self.args.all:
+                            path_output.append(stat['path_string'])
+                    else:
+                        path_output.append(stat['path_string'])
                     total += stat['total']
             elif self.filesystem.isfile(path):
                 exists = True
                 stat = self._stat_path(path)
-                path_output.append(stat['path_string'])
+                if stat['hidden']:
+                    if self.args.all:
+                        path_output.append(stat['path_string'])
+                else:
+                    path_output.append(stat['path_string'])
                 total = stat['total']
             else:
                 exists = False
                 total = 0
-                path_output.append('ls: cannot access {}: No such file or directory'.format(path))
+                path_output.append('ls: cannot access {}: No such file or directory'.format(path.lstrip('/')))
         path_info = _PathInfo(path, total, path_output, exists, is_directory)
         self._add_path_output(path_info, key_path)
 
@@ -149,3 +181,25 @@ class LsCommand(object):
             self.output[path_info.path] = path_info
         else:
             self.output[key_path] = path_info
+
+    def _get_hidden_dirs(self, path):
+        path = self.filesystem.getsyspath(path)
+        parent_path = os.path.abspath(os.path.join(path, os.pardir))
+        return '{}\n{}\n'.format(self._stat_relative_dirs(path, name='.'),
+                                 self._stat_relative_dirs(parent_path, name='..'))
+
+    def _stat_relative_dirs(self, path, name=None):
+        stat_result = os.stat(path)
+        try:
+            last_modified = time.strftime("%b %d %H:%M", time.localtime(stat_result.st_mtime))
+        except ValueError:
+            last_modified = time.strftime("%b %d %H:%M")
+        return "%s %2s %s %s %6s %s %s" % (
+            filemode(stat_result.st_mode),
+            stat_result.st_nlink,
+            'ftp',
+            'ftp',
+            stat_result.st_size,
+            last_modified,
+            name
+        )

@@ -350,7 +350,7 @@ class HornetTests(BaseTestClass):
         self.assertTrue('passwd' in dir_outputs[0])
         self.assertTrue('sysctl.conf' in dir_outputs[0])  # No carriage return here, because it was split before
         self.assertTrue('init.d' in dir_outputs[0])  # No carriage return here, because it was split before
-        self.assertTrue(len(dir_outputs[0].split('\r\n')) == 5)  # make sure 4 lines are generated
+        self.assertEquals(len(dir_outputs[0].split('\r\n')), 5)
 
         self.assertTrue(dir_outputs[1].startswith('var:'))
         self.assertTrue('total 0' in dir_outputs[1])
