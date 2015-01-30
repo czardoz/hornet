@@ -52,7 +52,7 @@ class LsCommand(object):
                 self._process_path(normalized_path, key_path=p)
             except BackReferenceError as e:
                 logger.warn('Access to the external file system was attempted.')
-                new_path = os.path.join(self.working_path, p.strip('../'))
+                new_path = os.path.join(self.working_path, p.lstrip('../'))
                 self._process_path(new_path, key_path=p)
         result = ''
         if len(self.paths) == 1:
@@ -68,7 +68,13 @@ class LsCommand(object):
                 result += '\n'.join(current_path_info.path_output)
             else:
                 if self.args.all:
-                    dirs = ['.', '..'] + current_path_info.path_output
+                    if not self.args.directory:
+                        if not current_path_info.is_dir:
+                            dirs = current_path_info.path_output
+                        else:
+                            dirs = ['.', '..'] + current_path_info.path_output
+                    else:
+                        dirs = current_path_info.path_output
                 else:
                     dirs = current_path_info.path_output
                 result += ' '.join(dirs)
