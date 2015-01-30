@@ -1352,7 +1352,6 @@ class HornetTests(BaseTestClass):
         next_prompt = lines[-1]
 
         self.assertEquals(command, ls_command)
-        print command_output
         self.assertTrue('.rcconf' in command_output)
         self.assertFalse('. ' in command_output)
         self.assertFalse('..' in command_output)
