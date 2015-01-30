@@ -120,6 +120,9 @@ class VirtualHost(object):
         else:
             shell.writeline('{}'.format(self.working_path))
 
+    def run_ifconfig(self, params, shell):
+        pass
+
     def run_ls(self, params, shell):
         paths = []
         other_params = []
