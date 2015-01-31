@@ -19,9 +19,9 @@
 
 import logging
 import os
+import time
 
 from tarfile import filemode  # Coverts file/directory mode into the ls format (e.g drwxr-xr-x)
-import time
 from fs.errors import BackReferenceError
 
 logger = logging.getLogger(__name__)
