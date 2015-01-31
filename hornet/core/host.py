@@ -20,12 +20,12 @@
 import argparse
 import logging
 import os
-import fs
 import hornet
 
 from fs.errors import BackReferenceError
 from fs.osfs import OSFS
 from hornet.common.helpers import get_random_item
+from hornet.core.commands.ifconfig_command import IfconfigCommand
 from hornet.core.commands.ls_command import LsCommand
 
 logger = logging.getLogger(__name__)
@@ -51,6 +51,7 @@ class VirtualHost(object):
     def __init__(self, params, network, fs_dir):
         self.hostname = params['hostname']
         self.ip_address = params['ip_address']
+        self.network = network
         self.env = params['env']
 
         valid_ips = map(str, network[1:-1])
@@ -121,7 +122,28 @@ class VirtualHost(object):
             shell.writeline('{}'.format(self.working_path))
 
     def run_ifconfig(self, params, shell):
-        pass
+        if len(params) >= 2:
+            shell.writeline('SIOCSIFFLAGS: Operation not permitted')
+            return
+        if params:
+            parameter = params[0]
+            if parameter == '--version':
+                version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                                 'commands', 'ifconfig', 'version')
+                self.send_data_from_file(version_file_path, shell)
+                logger.debug('Sending version string for ifconfig from {} file'.format(version_file_path))
+                return
+            elif parameter == '--help' or parameter == '-h':
+                help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                              'commands', 'ifconfig', 'help')
+                self.send_data_from_file(help_file_path, shell)
+                logger.debug('Sending version string for ifconfig from {} file'.format(help_file_path))
+                return
+        output_template_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                            'commands', 'ifconfig', 'output_template')
+        ifconfig_command = IfconfigCommand(params, output_template_path, self.ip_address, self.network)
+        output = ifconfig_command.process()
+        shell.writeline(output)
 
     def run_ls(self, params, shell):
         paths = []
@@ -205,20 +227,14 @@ class VirtualHost(object):
             help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                           'commands', 'ls', 'help')
             logger.debug('Sending help string from file {}'.format(help_file_path))
-            with open(help_file_path) as help_file:
-                for line in help_file:
-                    line = line.strip()
-                    shell.writeline(line)
+            self.send_data_from_file(help_file_path, shell)
             return
 
         if args.version:
             version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                              'commands', 'ls', 'version')
             logger.debug('Sending version string from file {}'.format(version_file_path))
-            with open(version_file_path) as version_file:
-                for line in version_file:
-                    line = line.strip()
-                    shell.writeline(line)
+            self.send_data_from_file(version_file_path, shell)
             return
 
         ls_cmd = LsCommand(args, paths, self.filesystem, self.working_path)
@@ -252,3 +268,10 @@ class VirtualHost(object):
                     logger.info('Assigned IP {} to host {}'.format(self.ip_address, self.hostname))
                     return True
         return False
+
+    @staticmethod
+    def send_data_from_file(path, shell):
+        with open(path, 'r') as infile:
+            for line in infile:
+                line = line.strip()
+                shell.writeline(line)
