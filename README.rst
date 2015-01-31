@@ -26,6 +26,8 @@ to default with a simple configuration change.
 
 At a high level, Hornet can be visualized to be working according to the following diagram:
 
+.. code-block::
+
                                                    +-------------+
                                                    | VirtualHost |
                                 +----------------> |             |
@@ -81,9 +83,13 @@ Installation
 
 Installing is simple,
 
+.. code-block::
+
     $ pip install git+https://github.com/czardoz/hornet.git
 
 And since the latest version of telnetsrvlib on GitHub is super cool
+
+.. code-block::
 
     $ pip install --upgrade git+https://github.com/ianepperson/telnetsrvlib.git#egg=telnetsrv-0.4.1
 
@@ -92,14 +98,20 @@ Usage
 
 Create a directory anywhere
 
+.. code-block::
+
     $ mkdir ~/honeypot
 
 Initialize Hornet
+
+.. code-block::
 
     $ cd honeypot
     $ hornet -v
 
 You should see something like this (ignore the errors):
+
+.. code-block::
 
     2015-01-31 19:34:19,624 [INFO] (root) Starting Hornet, version: 0.0.1
     2015-01-31 19:34:19,624 [INFO] (hornet.main) Config file /tmp/honeypot/config.json not found, copying default
@@ -113,6 +125,8 @@ You should see something like this (ignore the errors):
 
 Once you get it working, you can set about configuring it. Hit `Ctrl+C` to stop the honeypot.
 
+.. code-block::
+
     ...
     2015-01-31 19:34:19,640 [INFO] (hornet.main) SSH server listening on 127.0.0.1:59866
     ^CKeyboardInterrupt
@@ -120,6 +134,8 @@ Once you get it working, you can set about configuring it. Hit `Ctrl+C` to stop 
     2015-01-31 19:40:58,419 [DEBUG] (root) Stopping the server
 
 Now, you'll see a ``config.json`` created in the current directory.
+
+.. code-block::
 
     $ cat config.json
     {
@@ -162,6 +178,8 @@ the config file). These filesystems can be populated with any files you
 wish.
 
 You can now restart the honeypot:
+
+.. code-block::
 
     $ hornet -v
 
