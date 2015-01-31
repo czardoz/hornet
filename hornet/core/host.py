@@ -88,6 +88,10 @@ class VirtualHost(object):
         self.logged_in = True
         self.current_user = username
 
+    def logout(self):
+        self.logged_in = False
+        self.current_user = None
+
     @property
     def welcome(self):
         if self.filesystem.isfile('/etc/motd'):

@@ -137,7 +137,8 @@ class Shell(TelnetHandler):
             self.RUNSHELL = False
             self.login_stack = []
             return
-        del self.login_stack[-1]
+        current_host = self.login_stack.pop()
+        current_host.logout()
         prev_host = self.login_stack[-1]
         self.set_host(prev_host)
 
