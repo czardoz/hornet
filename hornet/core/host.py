@@ -263,6 +263,69 @@ class VirtualHost(object):
                 self.working_path = os.path.normpath(cd_path)
                 logger.debug('Working directory for host {} changed to {}'.format(self.hostname, self.working_path))
 
+    def run_uname(self, params, shell):
+
+        if not params:
+            shell.writeline('Linux')
+            return
+
+        buff = ''
+        info = ['Linux', self.hostname, '3.13.0-37-generic',
+                '#64-Ubuntu SMP Mon Sep 22 21:30:01 UTC 2014', 'i686',
+                'i686', 'i686', 'GNU/Linux']
+        parser = Parser(add_help=False)
+        parser.add_argument('-a', '--all', default=False, action='store_true')
+        parser.add_argument('-s', '--kernel-name', default=False, action='store_true')
+        parser.add_argument('-n', '--nodename', default=False, action='store_true')
+        parser.add_argument('-r', '--kernel-release', default=False, action='store_true')
+        parser.add_argument('-v', '--kernel-version', default=False, action='store_true')
+        parser.add_argument('-m', '--kernel-machine', default=False, action='store_true')
+        parser.add_argument('-p', '--processor', default=False, action='store_true')
+        parser.add_argument('-i', '--hardware-platform', default=False, action='store_true')
+        parser.add_argument('-o', '--operating-system', default=False, action='store_true')
+        parser.add_argument('--help', default=False, action='store_true')
+        parser.add_argument('--version', default=False, action='store_true')
+
+        try:
+            args = parser.parse_args(params)
+        except ParseError:
+            shell.writeline('uname: invalid options -- \'{}\''.format(' '.join(params)))
+            shell.writeline('Try \'uname --help\' for more information.')
+            return
+
+        if args.all:
+            buff = ' '.join(info)
+            shell.writeline(buff)
+            return
+        if args.help:
+            help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                          'commands', 'uname', 'help')
+            self.send_data_from_file(help_file_path, shell)
+            return
+        if args.version:
+            version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                             'commands', 'uname', 'version')
+            self.send_data_from_file(version_file_path, shell)
+            return
+        if args.kernel_name:
+            buff = buff + info[0] + ' '
+        if args.nodename:
+            buff = buff + self.hostname + ' '
+        if args.kernel_release:
+            buff = buff + info[2] + ' '
+        if args.kernel_version:
+            buff = buff + info[3] + ' '
+        if args.kernel_machine:
+            buff = buff + info[4] + ' '
+        if args.processor:
+            buff = buff + info[4] + ' '
+        if args.hardware_platform:
+            buff = buff + info[4] + ' '
+        if args.operating_system:
+            buff += 'GNU/Linux'
+
+        shell.writeline(buff)
+
     def _set_ip_from_previous_run(self, fs_dir, valid_ips):  # pragma: no cover
         for dir_name in os.listdir(fs_dir):
             if dir_name.startswith(self.hostname + '_'):
