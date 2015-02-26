@@ -27,6 +27,7 @@ from fs.osfs import OSFS
 from hornet.common.helpers import get_random_item
 from hornet.core.commands.ifconfig_command import IfconfigCommand
 from hornet.core.commands.ls_command import LsCommand
+from hornet.core.commands.ping_command import PingCommand
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +125,22 @@ class VirtualHost(object):
             shell.writeline('pwd: too many arguments')
         else:
             shell.writeline('{}'.format(self.working_path))
+
+    def run_ping(self, params, shell):
+
+        options = [x for x in params if x.startswith('-')]
+
+        if 'h' in options or len(params) == 0:
+            help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                          'commands', 'ping', 'help')
+            self.send_data_from_file(help_file_path, shell)
+            return
+
+        filtered_params = [p for p in params if not p.startswith('-')]
+
+        ping_host = filtered_params[-1]
+        ping_command = PingCommand(ping_host, shell)
+        ping_command.process()
 
     def run_ifconfig(self, params, shell):
         if len(params) >= 2:

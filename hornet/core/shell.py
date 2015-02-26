@@ -22,17 +22,11 @@ import curses
 
 import logging
 import socket
-import traceback
+import gevent
 
 from telnetsrv.green import TelnetHandler
 
 logger = logging.getLogger(__name__)
-
-
-class NoHelpArgumentParser(argparse.ArgumentParser):
-
-    def error(self, message):
-        logger.error('Error occured while parsing the arguments: ' + message)
 
 
 class Shell(TelnetHandler):
@@ -52,6 +46,9 @@ class Shell(TelnetHandler):
         self.config = config
         self.raw_input = None
         self.input = None
+        self.command_greenlet = None
+        self.interrupt = False
+
         TelnetHandler.__init__(self, request, client_address, server)
 
     def set_host(self, host, default=False):
@@ -78,17 +75,22 @@ class Shell(TelnetHandler):
                 self.input = self.input_reader(self, raw_input_)
                 self.raw_input = self.input.raw
                 if self.input.cmd:
+
+                    # Clear the interrupt flag
+                    self.interrupt = False
+
                     cmd = self.input.cmd
                     params = self.input.params
                     try:
                         if cmd == 'QUIT':  # Handle Ctrl+D
                             cmd = 'logout'
-                        if cmd in ['ssh', 'logout']:  # These are handled by the Shell itself.
+                        if cmd in {'ssh', 'logout'}:  # These are handled by the Shell itself.
                             command = getattr(self, 'run_' + cmd)
-                            command(params)
+                            self.command_greenlet = gevent.spawn(command, params)
                         else:  # The rest of the commands are handled by the VirtualHosts
                             command = getattr(self.current_host, 'run_' + cmd)
-                            command(params, self)
+                            self.command_greenlet = gevent.spawn(command, params, self)
+                        gevent.joinall([self.command_greenlet])
                     except AttributeError:
                         # User entered something we have not implemented.
                         logger.exception('AttributeError occured while running '
@@ -165,3 +167,15 @@ class Shell(TelnetHandler):
         self.CODES['INS'] = curses.tigetstr('ich1')
         self.CODES['CSRLEFT'] = curses.tigetstr('cub1')
         self.CODES['CSRRIGHT'] = curses.tigetstr('cuf1')
+
+    def inputcooker_store_queue(self, char):
+        """Put the cooked data in the input queue (no locking needed)"""
+        if type(char) in [type(()), type([]), type("")]:
+            for v in char:
+                if v == chr(3):
+                    self.interrupt = True
+                self.cookedq.put(v)
+        else:
+            if char == chr(3):
+                self.interrupt = True
+            self.cookedq.put(char)
