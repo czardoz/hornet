@@ -86,11 +86,10 @@ class Shell(TelnetHandler):
                             cmd = 'logout'
                         if cmd in {'ssh', 'logout'}:  # These are handled by the Shell itself.
                             command = getattr(self, 'run_' + cmd)
-                            self.command_greenlet = gevent.spawn(command, params)
+                            command(params)
                         else:  # The rest of the commands are handled by the VirtualHosts
                             command = getattr(self.current_host, 'run_' + cmd)
-                            self.command_greenlet = gevent.spawn(command, params, self)
-                        gevent.joinall([self.command_greenlet])
+                            command(params, self)
                     except AttributeError:
                         # User entered something we have not implemented.
                         logger.exception('AttributeError occured while running '
@@ -168,7 +167,7 @@ class Shell(TelnetHandler):
         self.CODES['CSRLEFT'] = curses.tigetstr('cub1')
         self.CODES['CSRRIGHT'] = curses.tigetstr('cuf1')
 
-    def inputcooker_store_queue(self, char):
+    def inputcooker_store_queue(self, char):  # pragma: no cover
         """Put the cooked data in the input queue (no locking needed)"""
         if type(char) in [type(()), type([]), type("")]:
             for v in char:

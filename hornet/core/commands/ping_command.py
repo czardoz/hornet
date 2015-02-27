@@ -73,7 +73,7 @@ class PingCommand(object):
 
         self.shell.writeline('^C')
         self.shell.writeline('--- {} ping statistics ---'.format(self.host))
-        self.shell.writeline('{} packets transmitted, {} received, {} packet loss, time {}ms'.format(
+        self.shell.writeline('{} packets transmitted, {} received, {} packet loss, time {:.2f}ms'.format(
             self.total_count, self.success_count, self._get_percentage_packet_loss(), sum(self.times)
         ))
         self.shell.writeline('rtt min/avg/max/mdev = {:.2f}/{:.2f}/{:.2f}/{:.2f} ms'.format(

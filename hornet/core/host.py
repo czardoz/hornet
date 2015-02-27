@@ -130,7 +130,7 @@ class VirtualHost(object):
 
         options = [x for x in params if x.startswith('-')]
 
-        if 'h' in options or len(params) == 0:
+        if '-h' in options or len(params) == 0:
             help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                           'commands', 'ping', 'help')
             self.send_data_from_file(help_file_path, shell)
@@ -139,6 +139,7 @@ class VirtualHost(object):
         filtered_params = [p for p in params if not p.startswith('-')]
 
         ping_host = filtered_params[-1]
+        logger.debug('Going to ping {}'.format(ping_host))
         ping_command = PingCommand(ping_host, shell)
         ping_command.process()
 
