@@ -22,7 +22,6 @@ import curses
 
 import logging
 import socket
-import gevent
 
 from telnetsrv.green import TelnetHandler
 
