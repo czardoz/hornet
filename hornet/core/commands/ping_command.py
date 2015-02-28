@@ -33,8 +33,10 @@ logger = logging.getLogger(__name__)
 class PingCommand(object):
 
     def __init__(self, host, shell):
-        self.host = host
+        self.user_provided_host = host
         self.shell = shell
+
+        self.host = None
         self.ip = None
 
         # These record the stats to show at the end
@@ -51,7 +53,7 @@ class PingCommand(object):
 
         self._resolve_hostname()
         if not self.ip:
-            self.shell.writeline('ping: unknown host {}'.format(self.host))
+            self.shell.writeline('ping: unknown host {}'.format(self.user_provided_host))
             return
 
         self.shell.writeline('PING {} ({}) 56(84) bytes of data.'.format(self.host, self.ip))
@@ -72,11 +74,11 @@ class PingCommand(object):
             gevent.sleep(1)
 
         self.shell.writeline('^C')
-        self.shell.writeline('--- {} ping statistics ---'.format(self.host))
+        self.shell.writeline('--- {} ping statistics ---'.format(self.user_provided_host))
         self.shell.writeline('{} packets transmitted, {} received, {} packet loss, time {:.2f}ms'.format(
             self.total_count, self.success_count, self._get_percentage_packet_loss(), sum(self.times)
         ))
-        self.shell.writeline('rtt min/avg/max/mdev = {:.2f}/{:.2f}/{:.2f}/{:.2f} ms'.format(
+        self.shell.writeline('rtt min/avg/max/mdev = {:.3f}/{:.3f}/{:.3f}/{:.3f} ms'.format(
             min(self.times),
             sum(self.times) / self.total_count,
             max(self.times),
@@ -84,12 +86,17 @@ class PingCommand(object):
         ))
 
     def _resolve_hostname(self):
-        if re.match(IP_ADDRESS_REGEX, self.host):
-            self.ip = self.host  # Able to ping any IP
-            logger.debug('Set IP to {}'.format(self.ip))
+        if re.match(IP_ADDRESS_REGEX, self.user_provided_host):
+            target_host = self._reverse_hostname_lookup(self.user_provided_host)
+            if target_host:
+                self.host = target_host.hostname
+                self.ip = target_host.ip_address
+            else:
+                self.ip = self.user_provided_host  # Able to ping any IP
+                self.host = self.user_provided_host
         else:
-            if self.host in self.shell.vhosts:  # Only ping hosts in our honeypot
-                self.ip = self.shell.vhosts[self.host].ip_address
+            if self.user_provided_host in self.shell.vhosts:  # Only ping hosts in our honeypot
+                self.ip = self.shell.vhosts[self.user_provided_host].ip_address
 
     def _get_percentage_packet_loss(self):
         return '{:.2%}'.format(1 - float(self.success_count)/self.total_count)
@@ -97,3 +104,8 @@ class PingCommand(object):
     def _get_std_deviation(self):
         variance = sum((t - self.mean)**2 for t in self.times)
         return (variance / self.total_count) ** 0.5
+
+    def _reverse_hostname_lookup(self, ip_addr):
+        for h in self.shell.vhosts:
+            if self.shell.vhosts[h].ip_address == ip_addr:
+                return self.shell.vhosts[h]
