@@ -77,6 +77,8 @@ Hornet currently supports the following commands:
 * ``logout``
 * ``pwd``
 * ``ifconfig``
+* ``ping``
+* ``uname``
 
 Installation
 ==============
