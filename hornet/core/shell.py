@@ -177,3 +177,8 @@ class Shell(TelnetHandler):
             if char == chr(3):
                 self.interrupt = True
             self.cookedq.put(char)
+
+    def updateline(self, data):
+        self.write('\r')
+        self.write(self.CODES['DEOL'])
+        self.write(data)
