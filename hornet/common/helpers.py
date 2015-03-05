@@ -42,3 +42,13 @@ def get_random_item(collection):
         return collection[r]
     elif isinstance(collection, list):
         return random.choice(collection)
+
+
+# http://stackoverflow.com/questions/1094841/reusable-library-to-get-human-readable-version-of-file-size
+# By Fred Cicera
+def human_readable(num, suffix=''):
+    for unit in ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+        if abs(num) < 1024.0:
+            return "%3.1f%s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, 'Yi', suffix)
