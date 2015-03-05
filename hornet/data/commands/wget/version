@@ -1,0 +1,29 @@
+GNU Wget 1.15 built on linux-gnu.
+
++digest +https +ipv6 +iri +large-file +nls +ntlm +opie +ssl/openssl 
+
+Wgetrc: 
+    /etc/wgetrc (system)
+Locale: 
+    /usr/share/locale 
+Compile: 
+    gcc -DHAVE_CONFIG_H -DSYSTEM_WGETRC="/etc/wgetrc" 
+    -DLOCALEDIR="/usr/share/locale" -I. -I../../src -I../lib 
+    -I../../lib -D_FORTIFY_SOURCE=2 -I/usr/include -g -O2 
+    -fstack-protector --param=ssp-buffer-size=4 -Wformat 
+    -Werror=format-security -DNO_SSLv2 -D_FILE_OFFSET_BITS=64 -g -Wall 
+Link: 
+    gcc -g -O2 -fstack-protector --param=ssp-buffer-size=4 -Wformat 
+    -Werror=format-security -DNO_SSLv2 -D_FILE_OFFSET_BITS=64 -g -Wall 
+    -Wl,-Bsymbolic-functions -Wl,-z,relro -L/usr/lib -lssl -lcrypto 
+    -ldl -lz -lidn -luuid ftp-opie.o openssl.o http-ntlm.o 
+    ../lib/libgnu.a 
+
+Copyright (C) 2011 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later
+<http://www.gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Originally written by Hrvoje Niksic <hniksic@xemacs.org>.
+Please send bug reports and questions to <bug-wget@gnu.org>.

@@ -20,6 +20,7 @@
 import argparse
 import logging
 import os
+import gevent
 import hornet
 
 from fs.errors import BackReferenceError
@@ -28,6 +29,7 @@ from hornet.common.helpers import get_random_item
 from hornet.core.commands.ifconfig_command import IfconfigCommand
 from hornet.core.commands.ls_command import LsCommand
 from hornet.core.commands.ping_command import PingCommand
+from hornet.core.commands.wget_command import WgetCommand
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +127,38 @@ class VirtualHost(object):
             shell.writeline('pwd: too many arguments')
         else:
             shell.writeline('{}'.format(self.working_path))
+
+    def run_wget(self, params, shell):
+        options = []
+        url = None
+
+        for p in params:
+            if p.startswith('-'):
+                options.append(p)
+            else:
+                if not url:
+                    url = p
+
+        parser = Parser(add_help=False)
+        parser.add_argument('-h', '--help', action='store_true', default=False)
+        parser.add_argument('-V', '--version', action='store_true', default=False)
+        parser.add_argument('-O', '--output-document', action='store_true', default=False)
+        args = parser.parse_args(options)
+
+        if args.help or (not url and not args.version):
+            help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                          'commands', 'wget', 'help')
+            self.send_data_from_file(help_file_path, shell)
+            return
+
+        if args.version:
+            version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                             'commands', 'wget', 'version')
+            self.send_data_from_file(version_file_path, shell)
+            return
+
+        wget_command = WgetCommand(url, self.working_path, self.filesystem, args, shell)
+        wget_command.process()
 
     def run_ping(self, params, shell):
 
