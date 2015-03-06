@@ -138,10 +138,9 @@ class VirtualHost(object):
         if unparsed:
             url = unparsed[0]
         elif not args.help and not args.version:
-            shell.writeline('wget: missing URL')
-            shell.writeline('Usage: wget [OPTION]... [URL]...')
-            shell.writeline('')
-            shell.writeline('Try \'wget --help\' for more options.')
+            noparam_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
+                                             'commands', 'wget', 'no_param')
+            self.send_data_from_file(noparam_file_path, shell)
             return
 
         if args.help:

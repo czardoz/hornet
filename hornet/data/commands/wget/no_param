@@ -1,0 +1,4 @@
+wget: missing URL
+Usage: wget [OPTION]... [URL]...
+
+Try 'wget --help' for more options.
