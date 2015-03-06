@@ -129,23 +129,22 @@ class VirtualHost(object):
             shell.writeline('{}'.format(self.working_path))
 
     def run_wget(self, params, shell):
-        options = []
-        url = None
-
-        for p in params:
-            if p.startswith('-'):
-                options.append(p)
-            else:
-                if not url:
-                    url = p
-
         parser = Parser(add_help=False)
         parser.add_argument('-h', '--help', action='store_true', default=False)
         parser.add_argument('-V', '--version', action='store_true', default=False)
-        parser.add_argument('-O', '--output-document', action='store_true', default=False)
-        args = parser.parse_args(options)
+        parser.add_argument('-O', '--output-document')
+        args, unparsed = parser.parse_known_args(params)
 
-        if args.help or (not url and not args.version):
+        if unparsed:
+            url = unparsed[0]
+        elif not args.help and not args.version:
+            shell.writeline('wget: missing URL')
+            shell.writeline('Usage: wget [OPTION]... [URL]...')
+            shell.writeline('')
+            shell.writeline('Try \'wget --help\' for more options.')
+            return
+
+        if args.help:
             help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                           'commands', 'wget', 'help')
             self.send_data_from_file(help_file_path, shell)
