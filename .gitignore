@@ -16,3 +16,6 @@ develop-eggs
 # Installer logs
 pip-log.txt
 .coverage
+
+# htmlcov
+htmlcov/
