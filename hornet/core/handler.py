@@ -33,15 +33,14 @@ class SSHWrapper(object):
 
     """ Helper class to pass the client socket to _SSHHandler """
 
-    def __init__(self, vhosts, sessions, config, working_directory):
+    def __init__(self, vhosts, session_q, config, working_directory):
         self.vhosts = vhosts
-        self.sessions = sessions
+        self.session_q = session_q
         self.config = config
         self.working_directory = working_directory
 
     def handle_session(self, client_socket, client_address):
-        current_session = Session(client_address)
-        self.sessions[current_session.id] = current_session
+        current_session = Session(client_address, self.session_q)
         logger.info('Connection from {}, {}'.format(client_address, client_socket))
 
         # Set the host_key attribute on our _SSHHandler class

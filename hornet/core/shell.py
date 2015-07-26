@@ -22,6 +22,7 @@ import curses
 
 import logging
 import socket
+import arrow
 
 from telnetsrv.green import TelnetHandler
 
@@ -182,3 +183,7 @@ class Shell(TelnetHandler):
         self.write('\r')
         self.write(self.CODES['DEOL'])
         self.write(data)
+
+    def writecooked(self, text):
+        TelnetHandler.writecooked(self, text)
+        self.session.last_activity = arrow.now().timestamp

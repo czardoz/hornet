@@ -22,11 +22,13 @@ import logging
 import os
 import shutil
 import gevent.server
+import gevent.queue
 
 import hornet
 from hornet.core.handler import SSHWrapper
 from hornet.common.config import Config
 from hornet.core.host import VirtualHost
+from hornet.core.consumer import SessionConsumer
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,9 @@ class Hornet(object):
         self.server = None
         self.handler = None
         self.server_greenlet = None
-        self.sessions = {}
+        self.session_q = gevent.queue.Queue()
+        self.consumer = SessionConsumer(self.session_q)
+        self.consumer_greenlet = None
         self.working_directory = working_directory
         self.config = self._load_config()
 
@@ -70,15 +74,18 @@ class Hornet(object):
         return hosts
 
     def start(self):
-        self.handler = SSHWrapper(self.vhosts, self.sessions, self.config, self.working_directory)
+        self.handler = SSHWrapper(self.vhosts, self.session_q, self.config, self.working_directory)
         self.server = gevent.server.StreamServer((self.config.host, self.config.port),
                                                  handle=self.handler.handle_session)
         self.server_greenlet = gevent.spawn(self.server.serve_forever)
         while self.server.server_port == 0:
             gevent.sleep(0)  # Bad way of waiting, but can't think of anything right now.
         logger.info('SSH server listening on {}:{}'.format(self.server.server_host, self.server.server_port))
-        return self.server_greenlet
+
+        self.consumer_greenlet = self.consumer.start()
+        return [self.server_greenlet, self.consumer_greenlet]
 
     def stop(self):
         logging.debug('Stopping the server')
         self.server.stop()
+        self.consumer.stop()

@@ -19,13 +19,35 @@
 
 import uuid
 import arrow
+import gevent
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Session(object):
 
-    def __init__(self, client_address):
+    def __init__(self, client_address, session_q):
         self.id = uuid.uuid4()
         self.start_time = arrow.now().timestamp
         self.client_address = client_address
-        self.end_time = None
-        self.live = True
+        self.session_q = session_q
+        self.last_activity = arrow.now().timestamp
+        self.watcher_greenlet = gevent.spawn(self.watch)
+
+    def watch(self, max_diff=60):
+        logger.debug('Started watching %s', self)
+        while True:
+            diff = arrow.now().timestamp - self.last_activity
+            if diff > max_diff:
+                logger.debug('Detected inactive session: %s', self.id)
+                self.session_q.put(self)
+                break
+            gevent.sleep(5)
+
+    def __repr__(self):
+        return '<Session last_activity={}, id={}, client_address={}>'.format(
+            self.last_activity,
+            self.id,
+            self.client_address
+        )

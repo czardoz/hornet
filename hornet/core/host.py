@@ -20,7 +20,6 @@
 import argparse
 import logging
 import os
-import gevent
 import hornet
 
 from fs.errors import BackReferenceError
