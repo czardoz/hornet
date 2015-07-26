@@ -93,7 +93,7 @@ class Shell(TelnetHandler):
                     except AttributeError:
                         # User entered something we have not implemented.
                         logger.exception('AttributeError occured while running '
-                                         'command "{}" with params "{}"'.format(cmd, params))
+                                         'command "%s" with params "%s"', cmd, params)
                         self.writeerror("{}: command not found".format(cmd))
                     except:
                         logger.exception('Unknown exception has occured')

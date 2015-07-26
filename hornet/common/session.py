@@ -30,6 +30,7 @@ class Session(object):
     def __init__(self, client_address, session_q):
         self.id = uuid.uuid4()
         self.start_time = arrow.now().timestamp
+        self.end_time = None
         self.client_address = client_address
         self.session_q = session_q
         self.last_activity = arrow.now().timestamp
@@ -40,10 +41,14 @@ class Session(object):
         while True:
             diff = arrow.now().timestamp - self.last_activity
             if diff > max_diff:
-                logger.debug('Detected inactive session: %s', self.id)
-                self.session_q.put(self)
+                self.finish()
                 break
             gevent.sleep(5)
+
+    def finish(self):
+        logger.debug('Detected inactive session: %s', self.id)
+        self.end_time = self.last_activity
+        self.session_q.put(self)
 
     def __repr__(self):
         return '<Session last_activity={}, id={}, client_address={}>'.format(

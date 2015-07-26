@@ -29,7 +29,7 @@ def get_rsa_key_file(filename, password=None):
     try:
         key = RSAKey(filename=filename, password=password)
     except IOError:
-        logger.info('RSA Key file not found, generating a new one: {}'.format(filename))
+        logger.info('RSA Key file not found, generating a new one: %s', filename)
         key = RSAKey.generate(1024)
         key.write_private_key_file(filename, password=password)
     return key

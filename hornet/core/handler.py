@@ -41,7 +41,7 @@ class SSHWrapper(object):
 
     def handle_session(self, client_socket, client_address):
         current_session = Session(client_address, self.session_q)
-        logger.info('Connection from {}, {}'.format(client_address, client_socket))
+        logger.info('Connection from %s, %s', client_address, client_socket)
 
         # Set the host_key attribute on our _SSHHandler class
         key_file_path = os.path.join(self.working_directory, self.config.key_file)
@@ -50,7 +50,7 @@ class SSHWrapper(object):
         try:
             _SSHHandler(current_session, client_socket, client_address, self.vhosts, self.config)
         except SSHException:
-            logging.error('SSH Session {} ended unexpectedly'.format(current_session.id))
+            logging.error('SSH Session %s ended unexpectedly', current_session.id)
 
 
 class _SSHHandler(SSHHandler):

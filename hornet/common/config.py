@@ -44,8 +44,8 @@ class Config(object):
         self.default_hostname = None
         for p in self.vhost_params:
             if p.get('default', False):
-                logger.debug('Default host set to: {}'.format(p['hostname']))
+                logger.debug('Default host set to: %s', p['hostname'])
                 self.default_hostname = p['hostname']
         if self.default_hostname is None:
-            logger.info('Default host not found, setting {} to default.'.format(self.vhost_params[0]['hostname']))
+            logger.info('Default host not found, setting %s to default.', self.vhost_params[0]['hostname'])
             self.default_hostname = self.vhost_params[0]['hostname']

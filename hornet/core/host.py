@@ -34,9 +34,8 @@ logger = logging.getLogger(__name__)
 
 
 class Parser(argparse.ArgumentParser):
-
     def error(self, message):
-        logger.info('User supplied wrong arguments: {}'.format(message))
+        logger.info('User supplied wrong arguments: %s', message)
         raise ParseError()
 
 
@@ -45,7 +44,6 @@ class ParseError(Exception):
 
 
 class VirtualHost(object):
-
     """ Represents a single host. This class implements the commands
         that are host-specific, like pwd, ls, etc.
     """
@@ -58,17 +56,17 @@ class VirtualHost(object):
 
         valid_ips = map(str, network[1:-1])
         if self.ip_address is None:
-            logger.error('IP address for {} is not specified in the config file (or is "null")'.format(self.hostname))
+            logger.error('IP address for %s is not specified in the config file (or is "null")', self.hostname)
             if not self._set_ip_from_previous_run(fs_dir, valid_ips):
                 self.ip_address = get_random_item(valid_ips)
-                logger.info('Assigned random IP {} to host {}'.format(self.ip_address, self.hostname))
+                logger.info('Assigned random IP %s to host %s', self.ip_address, self.hostname)
         else:
             if not self.ip_address in valid_ips:
-                logger.error('IP Address {} for {} is not valid for the specified network'.format(
-                    params['ip_address'], self.hostname))
+                logger.error('IP Address %s for %s is not valid for the specified network', params['ip_address'],
+                             self.hostname)
                 if not self._set_ip_from_previous_run(fs_dir, valid_ips):
                     self.ip_address = get_random_item(valid_ips)
-                    logger.info('Assigned random IP {} to host {}'.format(self.ip_address, self.hostname))
+                    logger.info('Assigned random IP %s to host %s', self.ip_address, self.hostname)
 
         self.valid_logins = params['valid_logins']
         self.logged_in = False
@@ -86,7 +84,7 @@ class VirtualHost(object):
         return False
 
     def login(self, username):
-        logger.debug('User "{}" has logged into "{}" host'.format(username, self.hostname))
+        logger.debug('User "%s" has logged into "%s" host', username, self.hostname)
         self.logged_in = True
         self.current_user = username
 
@@ -170,7 +168,7 @@ class VirtualHost(object):
         filtered_params = [p for p in params if not p.startswith('-')]
 
         ping_host = filtered_params[-1]
-        logger.debug('Going to ping {}'.format(ping_host))
+        logger.debug('Going to ping %s', ping_host)
         ping_command = PingCommand(ping_host, shell)
         ping_command.process()
 
@@ -184,13 +182,13 @@ class VirtualHost(object):
                 version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                                  'commands', 'ifconfig', 'version')
                 self.send_data_from_file(version_file_path, shell)
-                logger.debug('Sending version string for ifconfig from {} file'.format(version_file_path))
+                logger.debug('Sending version string for ifconfig from %s file', version_file_path)
                 return
             elif parameter == '--help' or parameter == '-h':
                 help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                               'commands', 'ifconfig', 'help')
                 self.send_data_from_file(help_file_path, shell)
-                logger.debug('Sending version string for ifconfig from {} file'.format(help_file_path))
+                logger.debug('Sending version string for ifconfig from %s file', help_file_path)
                 return
         output_template_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                             'commands', 'ifconfig', 'output_template')
@@ -279,14 +277,14 @@ class VirtualHost(object):
         if args.help:
             help_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                           'commands', 'ls', 'help')
-            logger.debug('Sending help string from file {}'.format(help_file_path))
+            logger.debug('Sending help string from file %s', help_file_path)
             self.send_data_from_file(help_file_path, shell)
             return
 
         if args.version:
             version_file_path = os.path.join(os.path.dirname(hornet.__file__), 'data',
                                              'commands', 'ls', 'version')
-            logger.debug('Sending version string from file {}'.format(version_file_path))
+            logger.debug('Sending version string from file %s', version_file_path)
             self.send_data_from_file(version_file_path, shell)
             return
 
@@ -310,7 +308,7 @@ class VirtualHost(object):
                 shell.writeline('cd: {}: No such file or directory'.format(params[0]))
             else:
                 self.working_path = os.path.normpath(cd_path)
-                logger.debug('Working directory for host {} changed to {}'.format(self.hostname, self.working_path))
+                logger.debug('Working directory for host %s changed to %s', self.hostname, self.working_path)
 
     def run_uname(self, params, shell):
 
@@ -381,7 +379,7 @@ class VirtualHost(object):
                 possible_ip = dir_name.split('_')[1]
                 if possible_ip in valid_ips:
                     self.ip_address = possible_ip
-                    logger.info('Assigned IP {} to host {}'.format(self.ip_address, self.hostname))
+                    logger.info('Assigned IP %s to host %s', self.ip_address, self.hostname)
                     return True
         return False
 
