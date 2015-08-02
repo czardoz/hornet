@@ -239,7 +239,7 @@ class HornetTests(BaseTestClass):
         honeypot.stop()
 
     def test_uname_help_param(self):
-        """ Tests if 'uname --version' works """
+        """ Tests if 'uname --help' works """
 
         honeypot = Hornet(self.working_dir)
         honeypot.start()

@@ -103,6 +103,7 @@ class HornetTests(unittest.TestCase):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         with self.assertRaises(paramiko.AuthenticationException):
             client.connect('127.0.0.1', port=port, username='aksjd', password='asjdhkasd')
+        client.close()
         gevent.sleep(1)
         honeypot.stop()
 

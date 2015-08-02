@@ -349,7 +349,7 @@ class HornetTests(BaseTestClass):
         honeypot.stop()
 
     def test_wget_download_url(self):
-        """ Tests if 'wget http://httpbin.org/drip?numbytes=28&duration=3&code=200' downloads the file properly """
+        """ Tests if 'wget http://httpbin.org/drip?numbytes=2048&duration=3&code=200' downloads the file properly """
 
         honeypot = Hornet(self.working_dir)
         honeypot.start()
