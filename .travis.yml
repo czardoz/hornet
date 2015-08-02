@@ -6,6 +6,8 @@ install:
   - pip install -e .
   - pip install coveralls
   - pip install --upgrade git+https://github.com/ianepperson/telnetsrvlib.git#egg=telnetsrv-0.4.1
+before_script:
+ - mysql -e 'create database hornet;'
 script:
   - coverage run --timid --source=hornet setup.py test
 after_success:

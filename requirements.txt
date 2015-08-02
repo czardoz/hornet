@@ -6,3 +6,5 @@ netaddr
 fs
 nose
 arrow
+sqlalchemy
+pymysql

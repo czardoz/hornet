@@ -34,10 +34,11 @@ class SSHWrapper(object):
 
     """ Helper class to pass the client socket to _SSHHandler """
 
-    def __init__(self, vhosts, session_q, config, working_directory):
+    def __init__(self, vhosts, session_q, config, working_directory, db_handler):
         self.vhosts = vhosts
         self.session_q = session_q
         self.config = config
+        self.db_handler = db_handler
         self.working_directory = working_directory
 
     def handle_session(self, client_socket, client_address):
@@ -49,8 +50,8 @@ class SSHWrapper(object):
         _SSHHandler.host_key = get_rsa_key_file(key_file_path)
 
         try:
-            _SSHHandler(current_session, client_socket, client_address, self.vhosts, self.config)
-        except SSHException:
+            _SSHHandler(current_session, client_socket, client_address, self.vhosts, self.config, self.db_handler)
+        except (SSHException, EOFError):
             logging.error('SSH Session %s ended unexpectedly', current_session.id)
 
 
@@ -58,10 +59,11 @@ class _SSHHandler(SSHHandler):
 
     telnet_handler = Shell
 
-    def __init__(self, session, socket, client_address, vhosts, config):
+    def __init__(self, session, socket, client_address, vhosts, config, db_handler):
         self.session = session
         self.vhosts = vhosts
         self.config = config
+        self.db_handler = db_handler
         request = _SSHHandler.dummy_request()
         request._sock = socket
         super(_SSHHandler, self).__init__(request, client_address, None)
@@ -106,7 +108,8 @@ class _SSHHandler(SSHHandler):
         request.username = self.username
 
         # This should block until the user quits the pty
-        self.pty_handler(request, self.client_address, self.tcp_server, self.session, self.vhosts, self.config)
+        self.pty_handler(request, self.client_address, self.tcp_server,
+                         self.session, self.vhosts, self.config, self.db_handler)
 
         # Shutdown the entire session
         self.transport.close()

@@ -37,7 +37,7 @@ class Shell(TelnetHandler):
     PROMPT = ''
     WELCOME = ''
 
-    def __init__(self, request, client_address, server, session, vhosts, config):
+    def __init__(self, request, client_address, server, session, vhosts, config, db_handler):
         self.session = session
         self.vhosts = vhosts
         self.login_stack = []
@@ -48,6 +48,7 @@ class Shell(TelnetHandler):
         self.input = None
         self.command_greenlet = None
         self.interrupt = False
+        self.db_handler = db_handler
 
         TelnetHandler.__init__(self, request, client_address, server)
 

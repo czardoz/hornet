@@ -29,6 +29,7 @@ from hornet.core.handler import SSHWrapper
 from hornet.common.config import Config
 from hornet.core.host import VirtualHost
 from hornet.core.consumer import SessionConsumer
+from hornet.core.db.handler import DatabaseHandler
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,10 @@ class Hornet(object):
         self.consumer_greenlet = None
         self.working_directory = working_directory
         self.config = self._load_config()
+        try:
+            self.db_handler = DatabaseHandler(self.config)
+        except Exception:
+            logger.exception('Could not initialize database: %s', self.config.database)
 
         # Create virtual hosts
         self.vhosts = self._create_vhosts()
@@ -74,7 +79,7 @@ class Hornet(object):
         return hosts
 
     def start(self):
-        self.handler = SSHWrapper(self.vhosts, self.session_q, self.config, self.working_directory)
+        self.handler = SSHWrapper(self.vhosts, self.session_q, self.config, self.working_directory, self.db_handler)
         self.server = gevent.server.StreamServer((self.config.host, self.config.port),
                                                  handle=self.handler.handle_session)
         self.server_greenlet = gevent.spawn(self.server.serve_forever)
