@@ -19,10 +19,11 @@
 
 import logging
 import os
-from paramiko import SSHException
 
+from paramiko import SSHException
 from telnetsrv.paramiko_ssh import SSHHandler
-from hornet.common.session import Session
+
+from hornet.core.session import Session
 from hornet.core.shell import Shell
 from hornet.common.helpers import get_rsa_key_file
 
