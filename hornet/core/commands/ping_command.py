@@ -78,12 +78,13 @@ class PingCommand(object):
         self.shell.writeline('{} packets transmitted, {} received, {} packet loss, time {:.2f}ms'.format(
             self.total_count, self.success_count, self._get_percentage_packet_loss(), sum(self.times)
         ))
-        self.shell.writeline('rtt min/avg/max/mdev = {:.3f}/{:.3f}/{:.3f}/{:.3f} ms'.format(
-            min(self.times),
-            sum(self.times) / self.total_count,
-            max(self.times),
-            self._get_std_deviation()
-        ))
+        if self.times:  # Only show the average if ctrl + C was not pressed before a second was up
+            self.shell.writeline('rtt min/avg/max/mdev = {:.3f}/{:.3f}/{:.3f}/{:.3f} ms'.format(
+                min(self.times),
+                sum(self.times) / self.total_count,
+                max(self.times),
+                self._get_std_deviation()
+            ))
 
     def _resolve_hostname(self):
         if re.match(IP_ADDRESS_REGEX, self.user_provided_host):
