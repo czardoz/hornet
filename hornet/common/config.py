@@ -35,6 +35,7 @@ class Config(object):
     def __init__(self, cdict):
         self.port = cdict['port']
         self.host = cdict['host']
+        self.database = cdict['database']
         self.network = Network(cdict['network']['network_ip'],
                                cdict['network']['dns_server'], cdict['network']['gateway'])
         self.num_vhosts = len(cdict['virtual_hosts'])
