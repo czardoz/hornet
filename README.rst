@@ -10,10 +10,6 @@ Hornet
 .. |travis| image:: https://travis-ci.org/czardoz/hornet.png?branch=master
                       :target: https://travis-ci.org/czardoz/hornet
 
-.. |codehealth| image:: https://landscape.io/github/czardoz/hornet/master/landscape.png
-                          :target: https://landscape.io/github/czardoz/hornet/master
-                          :alt: Code Health
-
 Overview
 =========
 
