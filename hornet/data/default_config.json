@@ -7,7 +7,7 @@
         "dns_server": "192.168.0.2",
         "gateway": "192.168.0.1"
     },
-    "database": "mysql+pymysql://travis@127.0.0.1/hornet",
+    "database": "mysql+mysqldb://travis@127.0.0.1/hornet",
     "virtual_hosts": [
         {
             "hostname": "test01",
