@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import arrow
+
 from sqlalchemy import Column, String, DateTime, UnicodeText, ForeignKey, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -40,7 +42,7 @@ class AttackCommand(Base):
     __tablename__ = 'attackcommand'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    time = Column(DateTime)
+    time = Column(DateTime, default=lambda: arrow.now().timestamp)
     command = Column(String(2048))
     host = Column(String(2048))
     output = Column(UnicodeText)

@@ -49,6 +49,7 @@ class Shell(TelnetHandler):
         self.command_greenlet = None
         self.interrupt = False
         self.db_handler = db_handler
+        self.db_handler.create_attack_session(self.session)
 
         TelnetHandler.__init__(self, request, client_address, server)
 
@@ -101,6 +102,9 @@ class Shell(TelnetHandler):
                         self.writeerror("{}: command not found".format(cmd))
                     finally:
                         self.PROMPT = self.current_host.prompt
+                        self.db_handler.create_attack_command(
+                            self.session.id, cmd, self.current_host
+                        )
             except socket.error:
                 break
         self.logging.debug("Exiting handler")

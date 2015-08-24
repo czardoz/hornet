@@ -7,4 +7,4 @@ fs
 nose
 arrow
 sqlalchemy
-pymysql
+mysqlclient
