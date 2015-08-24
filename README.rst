@@ -2,7 +2,7 @@
 Hornet
 =======================
 
-|travis| |coverage| |codehealth|
+|travis| |coverage|
 
 .. |coverage| image:: https://coveralls.io/repos/czardoz/hornet/badge.png?branch=master
                         :target: https://coveralls.io/r/czardoz/hornet?branch=master
