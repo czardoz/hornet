@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 Session = sessionmaker()
 
+
 class DatabaseHandler(object):
 
     def __init__(self, config):
@@ -49,7 +50,7 @@ class DatabaseHandler(object):
         logger.debug('Adding a new attack command (%s) to session %s.', command, attack_session_id)
         with self.session_context() as dbsession:
             attack_session = dbsession.query(AttackSession).filter_by(id=attack_session_id).one()
-            attack_command = AttackCommand(command=command, host=host, session_id=attack_session.id)
+            attack_command = AttackCommand(command=command, host=host.hostname, session_id=attack_session.id)
             attack_session.commands.append(attack_command)
 
     @contextmanager

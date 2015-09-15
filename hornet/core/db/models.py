@@ -19,7 +19,7 @@
 
 import arrow
 
-from sqlalchemy import Column, String, DateTime, UnicodeText, ForeignKey, Integer
+from sqlalchemy import Column, String, UnicodeText, ForeignKey, Integer
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -30,10 +30,10 @@ class AttackSession(Base):
     __tablename__ = 'attacksession'
 
     id = Column(String(50), primary_key=True)
-    start_time = Column(DateTime)
+    start_time = Column(Integer)
     source_ip = Column(String(16))
     source_port = Column(Integer)
-    end_time = Column(DateTime)
+    end_time = Column(Integer)
     commands = relationship('AttackCommand', backref='session', order_by='AttackCommand.time',
                             cascade="all, delete-orphan")
 
@@ -42,7 +42,7 @@ class AttackCommand(Base):
     __tablename__ = 'attackcommand'
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    time = Column(DateTime, default=lambda: arrow.now().timestamp)
+    time = Column(Integer, default=lambda: arrow.now().timestamp)
     command = Column(String(2048))
     host = Column(String(2048))
     output = Column(UnicodeText)
