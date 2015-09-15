@@ -1,7 +1,7 @@
 sudo: false
 language: python
 python:
-  - 2.7
+- 2.7
 addons:
   apt:
     packages:
@@ -11,8 +11,19 @@ install:
   - pip install coveralls
   - pip install --upgrade git+https://github.com/ianepperson/telnetsrvlib.git#egg=telnetsrv-0.4.1
 before_script:
- - mysql -e 'create database hornet;'
+  - mysql -e 'create database hornet;'
 script:
   - coverage run --timid --source=hornet setup.py test
 after_success:
   - coveralls
+before_deploy:
+  - TRAVIS_COMMIT_MSG=\"$(git log --format=%B --no-merges -n 1)\"
+deploy:
+  provider: pypi
+  user: shouldntwork
+  password:
+    secure: IO6XHe8aoeev3stQh4TEz+251RXta4Qzya0rDuMCTXcDyxbffyyk0ppE7y454On28LqX3oDf5OLB3g4EFLr7hgx1Ckf5wiCkpV8vantLZPR8X1Uf0uTkLsJwHVmnoAOdravmlvLyw1wWbBsJminJLI4MlCXYRSjf0Gwyv1xo+rU=
+  on:
+    tags: true
+    repo: czardoz/hornet
+    condition: $TRAVIS_COMMIT_MSG =~ "[release]"
