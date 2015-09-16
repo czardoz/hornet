@@ -16,8 +16,6 @@ script:
   - coverage run --timid --source=hornet setup.py test
 after_success:
   - coveralls
-  - TRAVIS_COMMIT_MSG=\"$(git log --format=%B --no-merges -n 1)\"
-  - if [[ $TRAVIS_COMMIT_MSG =~ "[release]" ]]; then echo "Releasing a new Hornet version" && export TO_DEPLOY="true"; fi;
 deploy:
   provider: pypi
   user: shouldntwork
@@ -26,4 +24,3 @@ deploy:
   on:
     tags: true
     repo: czardoz/hornet
-    condition: $TO_DEPLOY = "true"
