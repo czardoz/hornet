@@ -18,7 +18,7 @@ after_success:
   - coveralls
 deploy:
   provider: pypi
-  user: shouldntwork
+  user: czardoz
   password:
     secure: IO6XHe8aoeev3stQh4TEz+251RXta4Qzya0rDuMCTXcDyxbffyyk0ppE7y454On28LqX3oDf5OLB3g4EFLr7hgx1Ckf5wiCkpV8vantLZPR8X1Uf0uTkLsJwHVmnoAOdravmlvLyw1wWbBsJminJLI4MlCXYRSjf0Gwyv1xo+rU=
   on:
