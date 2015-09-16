@@ -24,3 +24,4 @@ deploy:
   on:
     tags: true
     repo: czardoz/hornet
+    all_branches: true
