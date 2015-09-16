@@ -19,7 +19,7 @@ after_success:
   - if [[ $TRAVIS_COMMIT_MSG =~ "[release]" ]]; then echo "Releasing new version"
 before_deploy:
   - TRAVIS_COMMIT_MSG=\"$(git log --format=%B --no-merges -n 1)\"
-  - if [[ $TRAVIS_COMMIT_MSG =~ "[release]" ]]; then echo "Releasing new version"
+  - if [[ $TRAVIS_COMMIT_MSG =~ "[release]" ]]; then echo "Releasing new version"; fi;
 deploy:
   provider: pypi
   user: shouldntwork
