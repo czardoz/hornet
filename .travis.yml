@@ -16,6 +16,7 @@ script:
   - coverage run --timid --source=hornet setup.py test
 after_success:
   - coveralls
+  - if [[ $TRAVIS_COMMIT_MSG =~ "[release]" ]]; then echo "Releasing new version"
 before_deploy:
   - TRAVIS_COMMIT_MSG=\"$(git log --format=%B --no-merges -n 1)\"
   - if [[ $TRAVIS_COMMIT_MSG =~ "[release]" ]]; then echo "Releasing new version"
