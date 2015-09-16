@@ -27,4 +27,3 @@ deploy:
   on:
     tags: true
     repo: czardoz/hornet
-    condition: $TRAVIS_COMMIT_MSG =~ "[release]"
