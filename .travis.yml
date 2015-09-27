@@ -16,6 +16,8 @@ script:
   - coverage run --timid --source=hornet setup.py test
 after_success:
   - coveralls
+before_deploy:
+  - echo "Deploying tag: " $TRAVIS_TAG
 deploy:
   provider: pypi
   user: czardoz
