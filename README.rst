@@ -81,6 +81,14 @@ Installation
 
 Installing is simple,
 
+Install MySQL client libraries
+
+.. code-block::
+
+    $ sudo apt-get install libmysqlclient-dev
+
+Then install hornet using `pip`
+
 .. code-block::
 
     $ pip install git+https://github.com/czardoz/hornet.git
