@@ -27,3 +27,7 @@ class BaseTestClass(unittest.TestCase):
         default_host.filesystem.createfile('/etc/sysctl.conf')
         default_host.filesystem.createfile('/.hidden/.rcconf')
         default_host.filesystem.createfile('/initrd.img')
+
+
+if __name__ == '__main__':
+    unittest.main()

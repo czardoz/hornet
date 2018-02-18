@@ -103,3 +103,7 @@ class HornetTests(unittest.TestCase):
         self.assertEquals(hostname, 'test02')
         self.assertTrue(prompt.endswith('$ '))
         honeypot.stop()
+
+
+if __name__ == '__main__':
+    unittest.main()

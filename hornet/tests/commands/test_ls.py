@@ -23,6 +23,7 @@ gevent.monkey.patch_all()
 import paramiko
 import re
 import os
+import unittest
 
 import hornet
 
@@ -1368,3 +1369,7 @@ class HornetTests(BaseTestClass):
                     found = True
                     break
             self.assertTrue(found)
+
+
+if __name__ == '__main__':
+    unittest.main()

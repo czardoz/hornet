@@ -54,3 +54,7 @@ class HornetTests(unittest.TestCase):
         test_list = range(4, 99)
         x = get_random_item(test_list)
         self.assertTrue(4 <= x <= 99)
+
+
+if __name__ == '__main__':
+    unittest.main()

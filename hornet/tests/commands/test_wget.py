@@ -470,5 +470,6 @@ class HornetTests(BaseTestClass):
 
         honeypot.stop()
 
+
 if __name__ == '__main__':
     unittest.main()

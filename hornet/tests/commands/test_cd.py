@@ -345,3 +345,7 @@ class HornetTests(BaseTestClass):
         self.assertTrue(next_prompt.endswith('$ '))
 
         honeypot.stop()
+
+
+if __name__ == '__main__':
+    unittest.main()

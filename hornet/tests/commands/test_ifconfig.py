@@ -16,14 +16,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import os
 
 import gevent.monkey
 import hornet
 
 gevent.monkey.patch_all()
 
+import unittest
 import paramiko
+import os
 from hornet.main import Hornet
 from hornet.tests.commands.base import BaseTestClass
 
@@ -401,3 +402,7 @@ class HornetTests(BaseTestClass):
         self.assertTrue(next_prompt.endswith('$ '))
 
         honeypot.stop()
+
+
+if __name__ == '__main__':
+    unittest.main()

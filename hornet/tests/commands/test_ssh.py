@@ -21,6 +21,7 @@ import gevent.monkey
 gevent.monkey.patch_all()
 
 import paramiko
+import unittest
 from hornet.main import Hornet
 from hornet.tests.commands.base import BaseTestClass
 
@@ -199,3 +200,7 @@ class HornetTests(BaseTestClass):
         self.assertTrue('Name or service not known' in output)
         self.assertTrue(output.endswith('$ '))
         honeypot.stop()
+
+
+if __name__ == '__main__':
+    unittest.main()

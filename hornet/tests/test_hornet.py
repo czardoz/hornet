@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import gevent.monkey
+
 gevent.monkey.patch_all()
 
 import os
@@ -125,3 +126,7 @@ class HornetTests(unittest.TestCase):
         self.assertFalse(os.path.isfile(os.path.join(self.working_dir, 'config.json')))
         honeypot = Hornet(self.working_dir)
         self.assertTrue(os.path.isfile(os.path.join(self.working_dir, 'config.json')))
+
+
+if __name__ == '__main__':
+    unittest.main()
