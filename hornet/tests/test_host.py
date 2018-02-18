@@ -70,8 +70,8 @@ class HornetTests(unittest.TestCase):
 
         honeypot = Hornet(self.working_dir)
         random_host = get_random_item(honeypot.vhosts)
-        random_host.filesystem.makedir('/etc')
-        with random_host.filesystem.open('/etc/motd', 'w') as motd_file:
+        random_host.filesystem.makedir(u'/etc')
+        with random_host.filesystem.open(u'/etc/motd', 'w') as motd_file:
             motd_file.write(u'TestingCustomWelcomeMessage')
         self.assertEquals(random_host.welcome, u'TestingCustomWelcomeMessage')
 

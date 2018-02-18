@@ -94,8 +94,8 @@ class VirtualHost(object):
 
     @property
     def welcome(self):
-        if self.filesystem.isfile('/etc/motd'):
-            with self.filesystem.open('/etc/motd') as motd_file:
+        if self.filesystem.isfile(u'/etc/motd'):
+            with self.filesystem.open(u'/etc/motd') as motd_file:
                 return motd_file.read()
         else:
             return 'Welcome to {} server.'.format(self.hostname)
