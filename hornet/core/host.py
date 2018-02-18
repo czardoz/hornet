@@ -22,7 +22,7 @@ import logging
 import os
 import hornet
 
-from fs.errors import BackReferenceError
+from fs.errors import IllegalBackReference
 from fs.osfs import OSFS
 from hornet.common.helpers import get_random_item
 from hornet.core.commands.ifconfig_command import IfconfigCommand
@@ -298,8 +298,8 @@ class VirtualHost(object):
         cd_path = os.path.join(self.working_path, params[0])
         new_path_exists = False
         try:
-            new_path_exists = self.filesystem.exists(cd_path)
-        except BackReferenceError as e:
+            new_path_exists = self.filesystem.isfile(cd_path) or self.filesystem.isdir(cd_path)
+        except IllegalBackReference:
             logger.warn('Access to the external file system was attempted.')
             cd_path = '/'
             new_path_exists = True

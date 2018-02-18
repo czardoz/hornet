@@ -22,7 +22,7 @@ import os
 import time
 
 from tarfile import filemode  # Coverts file/directory mode into the ls format (e.g drwxr-xr-x)
-from fs.errors import BackReferenceError
+from fs.errors import IllegalBackReference
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class LsCommand(object):
             try:
                 normalized_path = os.path.normpath(os.path.join(self.working_path, p))
                 self._process_path(normalized_path, key_path=p)
-            except BackReferenceError as e:
+            except IllegalBackReference as e:
                 logger.warn('Access to the external file system was attempted.')
                 new_path = os.path.join(self.working_path, p.lstrip('../'))
                 self._process_path(new_path, key_path=p)
