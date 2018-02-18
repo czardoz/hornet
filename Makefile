@@ -1,2 +1,2 @@
 clean:
-	rm -rf *.pyc
+	find . -name \*.pyc -delete
