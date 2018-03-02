@@ -21,6 +21,7 @@ import gevent.monkey
 gevent.monkey.patch_all()
 
 import paramiko
+import unittest
 from hornet.main import Hornet
 from hornet.tests.commands.base import BaseTestClass
 

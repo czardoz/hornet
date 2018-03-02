@@ -17,16 +17,16 @@ class BaseTestClass(unittest.TestCase):
 
     def create_filesystem(self, honeypot):
         default_host = honeypot.vhosts[honeypot.config.default_hostname]
-        default_host.filesystem.makedir('/etc')
-        default_host.filesystem.makedir('/var')
-        default_host.filesystem.makedir('/bin')
-        default_host.filesystem.makedir('/.hidden')
-        default_host.filesystem.makedir('/etc/init.d')
-        default_host.filesystem.createfile('/etc/passwd')
-        default_host.filesystem.createfile('/etc/.config')
-        default_host.filesystem.createfile('/etc/sysctl.conf')
-        default_host.filesystem.createfile('/.hidden/.rcconf')
-        default_host.filesystem.createfile('/initrd.img')
+        default_host.filesystem.makedir(u'/etc')
+        default_host.filesystem.makedir(u'/var')
+        default_host.filesystem.makedir(u'/bin')
+        default_host.filesystem.makedir(u'/.hidden')
+        default_host.filesystem.makedir(u'/etc/init.d')
+        default_host.filesystem.create(u'/etc/passwd')
+        default_host.filesystem.create(u'/etc/.config')
+        default_host.filesystem.create(u'/etc/sysctl.conf')
+        default_host.filesystem.create(u'/.hidden/.rcconf')
+        default_host.filesystem.create(u'/initrd.img')
 
 
 if __name__ == '__main__':
