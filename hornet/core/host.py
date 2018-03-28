@@ -20,16 +20,15 @@
 import argparse
 import logging
 import os
-import gevent
 import hornet
 
-from fs.errors import BackReferenceError
-from fs.osfs import OSFS
+from fs.errors import IllegalBackReference
 from hornet.common.helpers import get_random_item
 from hornet.core.commands.ifconfig_command import IfconfigCommand
 from hornet.core.commands.ls_command import LsCommand
 from hornet.core.commands.ping_command import PingCommand
 from hornet.core.commands.wget_command import WgetCommand
+from hornet.core.fs_wrapper import SandboxedFS
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class VirtualHost(object):
             self.default = True
         else:
             self.default = False
-        self.filesystem = OSFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
+        self.filesystem = SandboxedFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
         self.working_path = '/'
 
     def authenticate(self, username, password):
@@ -302,7 +301,7 @@ class VirtualHost(object):
         new_path_exists = False
         try:
             new_path_exists = self.filesystem.exists(cd_path)
-        except BackReferenceError as e:
+        except IllegalBackReference as e:
             logger.warn('Access to the external file system was attempted.')
             cd_path = '/'
             new_path_exists = True
