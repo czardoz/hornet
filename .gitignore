@@ -19,3 +19,6 @@ pip-log.txt
 
 # htmlcov
 htmlcov/
+
+# coverage
+cover/

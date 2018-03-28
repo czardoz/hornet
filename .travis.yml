@@ -13,7 +13,7 @@ install:
 before_script:
   - mysql -e 'create database hornet;'
 script:
-  - coverage run --timid --source=hornet setup.py test
+  - nosetests --cover-branches --with-coverage --cover-erase --cover-package=hornet --cover-html
 after_success:
   - coveralls
 before_deploy:
