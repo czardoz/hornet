@@ -69,7 +69,7 @@ class _SSHHandler(SSHHandler):
         super(_SSHHandler, self).__init__(request, client_address, None)
 
     def authCallbackUsername(self, username):
-        raise  # Disable username based logins.
+        raise Exception()  # Disable username based logins.
 
     def authCallback(self, username, password):
         default = None
