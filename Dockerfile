@@ -13,12 +13,11 @@ ENV MYSQL_DATA_DIR=/var/lib/mysql \
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server;
 
+RUN pip install supervisor && echo_supervisord_conf;
+
 RUN mkdir /opt/hornet;
 COPY . /opt/hornet
 WORKDIR /opt/hornet
-
-RUN pip install . &&\
-    which hornet;
-
+RUN pip install .;
 
 ENTRYPOINT ["scripts/run.sh"]
