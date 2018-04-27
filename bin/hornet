@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     logging.info('Starting Hornet, version: %s', __version__)
     working_directory = os.getcwd()
-    honeypot = Hornet(working_directory)
+    honeypot = Hornet(working_directory, vhost_create_fs=True)
     greenlets = honeypot.start()
 
     try:

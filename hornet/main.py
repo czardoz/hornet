@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 class Hornet(object):
 
-    def __init__(self, working_directory):
+    def __init__(self, working_directory, vhost_create_fs=False):
         self.server = None
         self.handler = None
         self.server_greenlet = None
@@ -45,6 +45,7 @@ class Hornet(object):
         self.consumer_greenlet = None
         self.working_directory = working_directory
         self.config = self._load_config()
+        self._vhost_create_fs = vhost_create_fs
         try:
             self.db_handler = DatabaseHandler(self.config)
         except Exception:
@@ -74,7 +75,7 @@ class Hornet(object):
 
         hosts = {}
         for host_params in self.config.vhost_params:
-            h = VirtualHost(host_params, self.config.network, vhosts_path)
+            h = VirtualHost(host_params, self.config.network, vhosts_path, create_fs=self._vhost_create_fs)
             hosts[h.hostname] = h
         return hosts
 

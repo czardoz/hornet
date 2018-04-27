@@ -48,7 +48,7 @@ class VirtualHost(object):
         that are host-specific, like pwd, ls, etc.
     """
 
-    def __init__(self, params, network, fs_dir):
+    def __init__(self, params, network, fs_dir, create_fs=False):
         self.hostname = params['hostname']
         self.ip_address = params['ip_address']
         self.network = network
@@ -75,7 +75,8 @@ class VirtualHost(object):
             self.default = True
         else:
             self.default = False
-        self.filesystem = SandboxedFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)), create=True)
+        self.filesystem = SandboxedFS(os.path.join(fs_dir, '{}_{}'.format(self.hostname, self.ip_address)),
+                                      create_fs=create_fs, create=True)
         self.working_path = '/'
 
     def authenticate(self, username, password):

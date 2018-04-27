@@ -39,12 +39,14 @@ with open(os.path.join(os.path.dirname(hornet.__file__), 'data',
 class SandboxedFS(OSFS):
 
     def __init__(self, *args, **kwargs):
+        create_fs = kwargs.pop('create_fs') if 'create_fs' in kwargs else False
         super(SandboxedFS, self).__init__(*args, **kwargs)
-        for each in directories:
-            try:
-                self.makedirs(each)
-            except fs.errors.DirectoryExists as e:
-                logging.debug('Directory creation skipped for: %s', each)
+        if create_fs:
+            for each in directories:
+                try:
+                    self.makedirs(each)
+                except fs.errors.DirectoryExists as e:
+                    logging.debug('Directory creation skipped for: %s', each)
 
     def isfile(self, path):
         if not isinstance(path, unicode):
