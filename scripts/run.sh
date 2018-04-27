@@ -10,4 +10,5 @@ sed -i 's/port": 0,/port":\ 2222,/' config.json
 sed -i 's/"host": "127.0.0.1",/"host": "0.0.0.0",/' config.json
 
 mkdir -p /var/log/supervisord/;
+mkdir /opt/vfs/;
 supervisord -n -c ./hornet-supervisord.conf;
