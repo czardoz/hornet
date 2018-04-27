@@ -17,11 +17,34 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import logging
+
+import fs.errors
+
+import hornet
+
 from fs.osfs import OSFS
 
 
+directories = []
+
+with open(os.path.join(os.path.dirname(hornet.__file__), 'data',
+                       'linux_fs_list.txt')) as fslist:
+    for line in fslist:
+        line = line.strip()
+        directories.append(unicode(line))
+
+
 class SandboxedFS(OSFS):
+
+    def __init__(self, *args, **kwargs):
+        super(SandboxedFS, self).__init__(*args, **kwargs)
+        for each in directories:
+            try:
+                self.makedirs(each)
+            except fs.errors.DirectoryExists as e:
+                logging.debug('Directory creation skipped for: %s', each)
 
     def isfile(self, path):
         if not isinstance(path, unicode):
@@ -68,5 +91,3 @@ class SandboxedFS(OSFS):
         if not isinstance(path, unicode):
             path = unicode(path)
         return super(SandboxedFS, self).isdir(path)
-
-
