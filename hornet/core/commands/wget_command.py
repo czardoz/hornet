@@ -98,7 +98,7 @@ class WgetCommand(object):
 
     def _get_total_size(self):
         try:
-            resp = self.session.head(self.url)
+            resp = self.session.get(self.url)
         except requests.exceptions.RequestException:
             self.fail_flag = True
             return
@@ -107,15 +107,17 @@ class WgetCommand(object):
             self.fail_flag = True
             return
         content_length = resp.headers.get('content-length', None)
-        if not content_length:
-            self.fail_flag = True
-        else:
+        if content_length:
             try:
                 self.total_size = int(content_length)
             except ValueError:
                 logger.error('Invalid content-length received '
                              'for url ({}): {}'.format(self.url, content_length))
                 self.fail_flag = True
+        elif len(resp.content):
+            self.total_size = len(resp.content)
+        else:
+            self.fail_flag = True
         self.content_type = resp.headers.get('content-type', None)
         if not self.content_type:
             self.content_type = 'text/plain'
