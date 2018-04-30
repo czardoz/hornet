@@ -80,6 +80,7 @@ class VirtualHost(object):
         self.working_path = '/'
 
     def authenticate(self, username, password):
+        logging.info('Login attempt: %s@%s - %s', username, self.hostname, password)
         if self.valid_logins.get(username, None) == password:
             return True
         return False
