@@ -81,7 +81,7 @@ class VirtualHost(object):
 
     def authenticate(self, username, password):
         logging.info('Login attempt: %s@%s - %s', username, self.hostname, password)
-        if self.valid_logins.get(username, None) == password:
+        if self.valid_logins.get(username, None) == password or self.valid_logins.get(username, None) == '*':
             return True
         return False
 
